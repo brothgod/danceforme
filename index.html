@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Pose detection using the MediaPipe PoseLandmarker task</h1>
+
+    <section id="demos" class="invisible">
+      <section>
+        <input type="file" id="audioFileInput" />
+        <br />
+        <label for="playbackRate">Playback Rate:</label>
+        <input type="number" id="playbackRate" value="1" step="0.1" />
+
+        <!-- <audio id="audioPlayer" controls></audio> -->
+        <button id="playButton">Play</button>
+        <button id="stopButton">Stop</button>
+      </section>
+      <!-- <h2>Demo: Detecting Images</h2>
+      <p>
+        <b>Click on an image below</b>
+        to see the key landmarks of the body.
+      </p> -->
+
+      <!-- <h2>Demo: Webcam continuous pose landmarks detection</h2> -->
+      <p>
+        Stand in front of your webcam to get real-time pose landmarker
+        detection.
+        <br />
+        Click
+        <b>enable webcam</b>
+        below and grant access to the webcam if prompted.
+      </p>
+
+      <div id="liveView" class="videoView">
+        <button id="webcamButton" class="mdc-button mdc-button--raised">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label">ENABLE WEBCAM</span>
+        </button>
+        <div style="position: relative">
+          <video
+            id="webcam"
+            style="width: 1280px; height: 720px; position: abso"
+            autoplay
+            playsinline
+          ></video>
+          <canvas
+            class="output_canvas"
+            id="output_canvas"
+            width="1280"
+            height="720"
+            style="
+              position: absolute;
+              left: 0px;
+              top: 0px;
+              background: rgb(253, 18, 92);
+            "
+          ></canvas>
+        </div>
+      </div>
+    </section>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="script2.js"></script>
+  </body>
+</html>
