@@ -114,29 +114,22 @@ async function predictWebcam() {
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-      let angle = 0;
+      let rightArmAngle = 0;
+      let leftArmAngle = 0;
+      let legDifference = 0;
+      let hipAngle = 0;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
         // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        let landmark12 = landmark[12];
-        let landmark14 = landmark[14];
-        console.log(landmark12.x, landmark12.y, landmark12.z);
-        console.log(landmark14.x, landmark14.y, landmark14.z);
-        angle += angleWithXAxis(
-          landmark14.x - landmark12.x,
-          landmark14.y - landmark12.y
-        );
-
-        console.log(angle);
+        rightArmAngle += calculateRightArmAngle(landmark) / result.landmarks.length
+        leftArmAngle += calculateLeftArmAngle(landmark) / result.landmarks.length;
       }
-      let playback_rate = (angle / result.landmarks.length - 90) / 90;
-      // document.getElementById("playbackRate").value = parseFloat(
-      //   Math.max(playback_rate, 0.2)
-      // );
-      if (typeof player !== "undefined")
-        player.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
+      console.log("right arm" + rightArmAngle);
+      console.log("left arm" + leftArmAngle);
+      adjustPlayerEffects(rightArmAngle, leftArmAngle);
+
       canvasCtx.restore();
     });
   }
@@ -147,20 +140,41 @@ async function predictWebcam() {
   }
 }
 
-function angleWithXZPlane(x, y, z) {
-  // Calculate the magnitude of the projection onto the XZ-plane
-  const magnitudeXZ = Math.sqrt(x * x + z * z);
+function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
+  let landmark12 = landmark[12];
+  let landmark14 = landmark[14];
 
-  // Calculate the cosine of the angle with the XZ-plane
-  const cosAngle = magnitudeXZ === 0 ? 0 : z / magnitudeXZ;
+  let angle = angleWithXAxis(
+    landmark14.x - landmark12.x,
+    landmark14.y - landmark12.y
+  );
 
-  // Calculate the angle in radians
-  const angleRadians = Math.acos(cosAngle);
+  const positiveAngle = angle >= 0 ? angle : 360 + angle;
 
-  // Convert radians to degrees
-  const angleDegrees = angleRadians * (180 / Math.PI);
+  return clamp(positiveAngle-180, -90, 90);
+}
 
-  return angleDegrees;
+function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
+  let landmark11 = landmark[11];
+  let landmark13 = landmark[13];
+
+  let angle = angleWithXAxis(
+    landmark13.x - landmark11.x,
+    landmark13.y - landmark11.y
+  );
+
+  return clamp(-1*angle, -90, 90);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function adjustPlayerEffects(rightArmAngle, leftArmAngle){
+  let playback_rate = (rightArmAngle + 90) / 90;
+
+  if (typeof player !== "undefined")
+    player.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
 }
 
 function angleWithXAxis(x, y) {
@@ -170,10 +184,7 @@ function angleWithXAxis(x, y) {
   // Convert radians to degrees
   const angleDegrees = angleRadians * (180 / Math.PI);
 
-  // Ensure the angle is positive (between 0 and 360 degrees)
-  const positiveAngle = angleDegrees >= 0 ? angleDegrees : 360 + angleDegrees;
-
-  return positiveAngle;
+  return angleDegrees;
 }
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
