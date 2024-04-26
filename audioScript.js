@@ -15,7 +15,7 @@ const playbackRateInput = document.getElementById("playbackRate");
 // Add event listeners to UI elements
 playButton.addEventListener("click", () => {
   // Start playback
-  player.play();
+  player.start();
 });
 
 stopButton.addEventListener("click", () => {
@@ -24,8 +24,9 @@ stopButton.addEventListener("click", () => {
 });
 
 // Update playback rate based on input value
-playbackRateInput.addEventListener("change", function () {
+playbackRateInput.addEventListener("input", function () {
   player.playbackRate = parseFloat(this.value);
+  console.log(this.value);
 });
 
 audioFileInput.addEventListener("change", handleFileUpload);

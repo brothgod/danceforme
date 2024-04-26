@@ -132,7 +132,11 @@ async function predictWebcam() {
         console.log(angle);
       }
       let playback_rate = (angle / result.landmarks.length - 90) / 90;
-      audioPlayer.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
+      // document.getElementById("playbackRate").value = parseFloat(
+      //   Math.max(playback_rate, 0.2)
+      // );
+      if (typeof player !== "undefined")
+        player.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
       canvasCtx.restore();
     });
   }
@@ -174,50 +178,35 @@ function angleWithXAxis(x, y) {
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 
-// let audioPlayer = document.getElementById("audioPlayer");
-// let audioFileInput = document.getElementById("audioFileInput");
-// let playbackRateInput = document.getElementById("playbackRate");
-// Tone.start();
+let player;
 
-// const player = new Tone.Player();
-// // let player;
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  const fileUrl = URL.createObjectURL(file);
+  Tone.start();
+  player = new Tone.Player(fileUrl).toDestination();
+}
 
-// // Function to handle file upload
-// function handleFileUpload(event) {
-//   // player.toDestination();
-//   const file = event.target.files[0];
-//   // const reader = new FileReader();
-//   // reader.onload = function (event) {
-//   //   const buffer = event.target.result;
-//   //   player.load(buffer);
-//   //   // player.autostart = true;
-//   // };
-//   // reader.readAsArrayBuffer(file);
-//   // player.toDestination();
-//   const buffer = new Tone.ToneAudioBuffer(file);
-//   player.load(buffer);
-//   console.log(file);
-// }
+// Get references to UI elements
+const playButton = document.getElementById("playButton");
+const stopButton = document.getElementById("stopButton");
+const playbackRateInput = document.getElementById("playbackRate");
 
-// // Get references to UI elements
-// const playButton = document.getElementById("playButton");
-// const stopButton = document.getElementById("stopButton");
+// Add event listeners to UI elements
+playButton.addEventListener("click", () => {
+  // Start playback
+  player.start();
+});
 
-// // Add event listeners to UI elements
-// playButton.addEventListener("click", () => {
-//   // Start playback
-//   player.start();
-// });
+stopButton.addEventListener("click", () => {
+  // Stop playback
+  player.stop();
+});
 
-// stopButton.addEventListener("click", () => {
-//   // Stop playback
-//   player.stop();
-// });
+// Update playback rate based on input value
+playbackRateInput.addEventListener("input", function () {
+  player.playbackRate = parseFloat(this.value);
+  console.log(this.value);
+});
 
-// // Update playback rate based on input value
-// // playbackRateInput.addEventListener("change", function () {
-// //   player.playbackRate = parseFloat(this.value);
-// // });
-
-// // Event listener for file input change
-// audioFileInput.addEventListener("change", handleFileUpload);
+audioFileInput.addEventListener("change", handleFileUpload);
