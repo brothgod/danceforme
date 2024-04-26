@@ -32,7 +32,7 @@ const videoWidth = "480px";
 // Before we can use PoseLandmarker class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment to
 // get everything needed to run.
-const createPoseLandmarker = async () => {
+const createPoseLandmarker = async (numPeople) => {
   const vision = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
   );
@@ -42,11 +42,18 @@ const createPoseLandmarker = async () => {
       delegate: "GPU",
     },
     runningMode: runningMode,
-    numPoses: 2,
+    numPoses: numPeople,
   });
   demosSection.classList.remove("invisible");
 };
-createPoseLandmarker();
+const numPeople = document.getElementById("numPeople");
+numPeople.addEventListener("change", function () {
+  createPoseLandmarker(this.value)
+});
+
+createPoseLandmarker(numPeople.value);
+
+
 
 /********************************************************************
   // Demo 2: Continuously grab image from webcam stream and detect it.
@@ -96,6 +103,8 @@ function enableCam(event) {
   });
 }
 
+let lastLandmarks = null;
+let count = 0;
 let lastVideoTime = -1;
 async function predictWebcam() {
   canvasElement.style.height = videoHeight;
@@ -109,6 +118,7 @@ async function predictWebcam() {
   }
   let startTimeMs = performance.now();
   if (lastVideoTime !== video.currentTime) {
+    count+=1;
     lastVideoTime = video.currentTime;
     poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
       canvasCtx.save();
@@ -141,12 +151,12 @@ async function predictWebcam() {
 }
 
 function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
-  let landmark12 = landmark[12];
-  let landmark14 = landmark[14];
+  let rightShoulder = landmark[12];
+  let rightElbow = landmark[14];
 
   let angle = angleWithXAxis(
-    landmark14.x - landmark12.x,
-    landmark14.y - landmark12.y
+    rightElbow.x - rightShoulder.x,
+    rightElbow.y - rightShoulder.y
   );
 
   const positiveAngle = angle >= 0 ? angle : 360 + angle;
@@ -155,15 +165,20 @@ function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
 }
 
 function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
-  let landmark11 = landmark[11];
-  let landmark13 = landmark[13];
+  let leftShoulder = landmark[11];
+  let leftElbow = landmark[13];
 
   let angle = angleWithXAxis(
-    landmark13.x - landmark11.x,
-    landmark13.y - landmark11.y
+    leftElbow.x - leftShoulder.x,
+    leftElbow.y - leftShoulder.y
   );
 
   return clamp(-1*angle, -90, 90);
+}
+
+function calculateFeetDifference(landmarks, pastLandmarks){  //Returns the feet movement difference
+  let rightFoot
+
 }
 
 function clamp(value, min, max) {
@@ -202,6 +217,7 @@ function handleFileUpload(event) {
 const playButton = document.getElementById("playButton");
 const stopButton = document.getElementById("stopButton");
 const playbackRateInput = document.getElementById("playbackRate");
+const audioFileInput = document.getElementById("audioFileInput");
 
 // Add event listeners to UI elements
 playButton.addEventListener("click", () => {
