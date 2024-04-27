@@ -26,8 +26,8 @@ let poseLandmarker = undefined;
 let runningMode = "IMAGE";
 let enableWebcamButton;
 let webcamRunning = false;
-const videoHeight = "360px";
-const videoWidth = "480px";
+const videoHeight = "100%";
+const videoWidth = "100%";
 
 // Before we can use PoseLandmarker class we must wait for it to finish
 // loading. Machine Learning models can be large and take a moment to
@@ -48,12 +48,10 @@ const createPoseLandmarker = async (numPeople) => {
 };
 const numPeople = document.getElementById("numPeople");
 numPeople.addEventListener("change", function () {
-  createPoseLandmarker(this.value)
+  createPoseLandmarker(this.value);
 });
 
 createPoseLandmarker(numPeople.value);
-
-
 
 /********************************************************************
   // Demo 2: Continuously grab image from webcam stream and detect it.
@@ -118,7 +116,7 @@ async function predictWebcam() {
   }
   let startTimeMs = performance.now();
   if (lastVideoTime !== video.currentTime) {
-    count+=1;
+    count += 1;
     lastVideoTime = video.currentTime;
     poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
       canvasCtx.save();
@@ -133,8 +131,10 @@ async function predictWebcam() {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
         // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        rightArmAngle += calculateRightArmAngle(landmark) / result.landmarks.length
-        leftArmAngle += calculateLeftArmAngle(landmark) / result.landmarks.length;
+        rightArmAngle +=
+          calculateRightArmAngle(landmark) / result.landmarks.length;
+        leftArmAngle +=
+          calculateLeftArmAngle(landmark) / result.landmarks.length;
       }
       console.log("right arm" + rightArmAngle);
       console.log("left arm" + leftArmAngle);
@@ -150,7 +150,8 @@ async function predictWebcam() {
   }
 }
 
-function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
+function calculateRightArmAngle(landmark) {
+  //Returns angle between -90 and 90
   let rightShoulder = landmark[12];
   let rightElbow = landmark[14];
 
@@ -161,10 +162,11 @@ function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
 
   const positiveAngle = angle >= 0 ? angle : 360 + angle;
 
-  return clamp(positiveAngle-180, -90, 90);
+  return clamp(positiveAngle - 180, -90, 90);
 }
 
-function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
+function calculateLeftArmAngle(landmark) {
+  //Returns angle between -90 and 90
   let leftShoulder = landmark[11];
   let leftElbow = landmark[13];
 
@@ -173,19 +175,19 @@ function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
     leftElbow.y - leftShoulder.y
   );
 
-  return clamp(-1*angle, -90, 90);
+  return clamp(-1 * angle, -90, 90);
 }
 
-function calculateFeetDifference(landmarks, pastLandmarks){  //Returns the feet movement difference
-  let rightFoot
-
+function calculateFeetDifference(landmarks, pastLandmarks) {
+  //Returns the feet movement difference
+  let rightFoot;
 }
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function adjustPlayerEffects(rightArmAngle, leftArmAngle){
+function adjustPlayerEffects(rightArmAngle, leftArmAngle) {
   let playback_rate = (rightArmAngle + 90) / 90;
 
   if (typeof player !== "undefined")
