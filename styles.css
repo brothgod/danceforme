@@ -63,16 +63,14 @@ section {
   opacity: 0.2;
 }
 
-.videoView,
-.detectOnClick {
+.videoView {
   position: relative;
   float: left;
   width: 100%;
   cursor: pointer;
 }
 
-.videoView p,
-.detectOnClick p {
+.videoView p {
   /* position: absolute; */
   padding: 5px;
   background-color: #007f8b;
@@ -102,10 +100,15 @@ section {
   -moz-transform: rotateY(180deg);
 }
 
-.detectOnClick {
-  z-index: 0;
+#controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
-.detectOnClick img {
-  width: 100%;
+#liveView{
+  position: absolute;
+  top: 0;
+  left: 0;
 }
