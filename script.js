@@ -105,6 +105,7 @@ function enableCam(event) {
 
 let lastLandmarks = null;
 let count = 0;
+let interval = 10;
 let lastVideoTime = -1;
 async function predictWebcam() {
   canvasElement.style.height = videoHeight;
@@ -126,7 +127,7 @@ async function predictWebcam() {
 
       let rightArmAngle = 0;
       let leftArmAngle = 0;
-      let legDifference = 0;
+      let feetDifference = 0;
       let hipAngle = 0;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
@@ -136,10 +137,23 @@ async function predictWebcam() {
         rightArmAngle += calculateRightArmAngle(landmark) / result.landmarks.length
         leftArmAngle += calculateLeftArmAngle(landmark) / result.landmarks.length;
       }
-      console.log("right arm" + rightArmAngle);
-      console.log("left arm" + leftArmAngle);
-      adjustPlayerEffects(rightArmAngle, leftArmAngle);
 
+      if(count%interval==0){
+        if(result.landmarks.length==numPeople.value){
+          feetDifference = calculateFeetDifference(result.landmarks, lastLandmarks);
+          lastLandmarks = result.landmarks;
+          count = 0;
+          console.log("Feet difference: " + feetDifference);
+        }
+        else{
+          count--;
+        }
+      }
+      
+      console.log("Right arm angle: " + rightArmAngle);
+      console.log("Left arm angle: " + leftArmAngle);
+      adjustPlayerEffects(rightArmAngle, leftArmAngle);
+      
       canvasCtx.restore();
     });
   }
@@ -177,8 +191,27 @@ function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
 }
 
 function calculateFeetDifference(landmarks, pastLandmarks){  //Returns the feet movement difference
-  let rightFoot
+  if(pastLandmarks==null){
+    return 0;
+  }
+  let rightFeet = landmarks.map(landmark => {return landmark[28].x});
+  let pastRightFeet = pastLandmarks.map(landmark => {return landmark[28].x});
+  rightFeet.sort();
+  pastRightFeet.sort();
 
+  let leftFeet = landmarks.map(landmark => {return landmark[27].x});
+  let pastLeftFeet = pastLandmarks.map(landmark => {return landmark[27].x});
+  leftFeet.sort();
+  pastLeftFeet.sort();
+
+  let differences = 0;
+  for(let i = 0; i < numPeople.value; i+=1){
+    differences+=rightFeet[i]-pastRightFeet[i];
+    differences+=leftFeet[i]-pastLeftFeet[i];
+  }
+
+  console.log("right feet: " + rightFeet);
+  return differences / numPeople.value*2;
 }
 
 function clamp(value, min, max) {
