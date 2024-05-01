@@ -127,23 +127,25 @@ async function predictWebcam() {
 
       let rightArmAngle = 0;
       let leftArmAngle = 0;
-      let feetDifference = 0;
       let hipAngle = 0;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
         // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        rightArmAngle += calculateRightArmAngle(landmark) / result.landmarks.length
-        leftArmAngle += calculateLeftArmAngle(landmark) / result.landmarks.length;
+        rightArmAngle += calcRightArmAngle(landmark) / result.landmarks.length
+        leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
       }
 
       if(count%interval==0){
         if(result.landmarks.length==numPeople.value){
-          feetDifference = calculateFeetDifference(result.landmarks, lastLandmarks);
+          let rightFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 28);
+          let leftFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 27);
+          let headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks , 0);
           lastLandmarks = result.landmarks;
           count = 0;
-          console.log("Feet difference: " + feetDifference);
+          console.log("Feet difference: " + rightFootDiff);
+          console.log("Head Difference: " + headDiff);
         }
         else{
           count--;
@@ -164,7 +166,7 @@ async function predictWebcam() {
   }
 }
 
-function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
+function calcRightArmAngle(landmark){ //Returns angle between -90 and 90
   let rightShoulder = landmark[12];
   let rightElbow = landmark[14];
 
@@ -178,7 +180,7 @@ function calculateRightArmAngle(landmark){ //Returns angle between -90 and 90
   return clamp(positiveAngle-180, -90, 90);
 }
 
-function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
+function calcLeftArmAngle(landmark){  //Returns angle between -90 and 90
   let leftShoulder = landmark[11];
   let leftElbow = landmark[13];
 
@@ -190,28 +192,21 @@ function calculateLeftArmAngle(landmark){  //Returns angle between -90 and 90
   return clamp(-1*angle, -90, 90);
 }
 
-function calculateFeetDifference(landmarks, pastLandmarks){  //Returns the feet movement difference
+function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum){//Returns x-difference of pose number
   if(pastLandmarks==null){
     return 0;
   }
-  let rightFeet = landmarks.map(landmark => {return landmark[28].x});
-  let pastRightFeet = pastLandmarks.map(landmark => {return landmark[28].x});
-  rightFeet.sort();
-  pastRightFeet.sort();
-
-  let leftFeet = landmarks.map(landmark => {return landmark[27].x});
-  let pastLeftFeet = pastLandmarks.map(landmark => {return landmark[27].x});
-  leftFeet.sort();
-  pastLeftFeet.sort();
+  let landmarkX = landmarks.map(landmark => {return landmark[landmarkNum].x});
+  let pastLandmarkX = pastLandmarks.map(landmark => {return landmark[landmarkNum].x});
+  landmarkX.sort();
+  pastLandmarkX.sort();
 
   let differences = 0;
   for(let i = 0; i < numPeople.value; i+=1){
-    differences+=rightFeet[i]-pastRightFeet[i];
-    differences+=leftFeet[i]-pastLeftFeet[i];
+    differences+=landmarkX[i]-pastLandmarkX[i];
   }
 
-  console.log("right feet: " + rightFeet);
-  return differences / numPeople.value*2;
+  return differences / numPeople.value;
 }
 
 function clamp(value, min, max) {
@@ -241,9 +236,17 @@ let player;
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
-  const fileUrl = URL.createObjectURL(file);
+  const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
+  // const fileUrl = URL.createObjectURL(file);
   Tone.start();
-  player = new Tone.Player(fileUrl).toDestination();
+  player = new Tone.Player(fileUrl);
+  setUpEffects(player);
+}
+
+function setUpEffects(tonePlayer){
+  const reverb = new Tone.Reverb().toDestination();
+  tonePlayer.connect(reverb);
+
 }
 
 // Get references to UI elements
