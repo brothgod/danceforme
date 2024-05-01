@@ -92,7 +92,7 @@ li a:hover {
 .popup-content {
   background-color: #0d1321;
   color: #ffeddf;
-  margin: 100px auto;
+  margin: 10% auto;
   padding: 24px 32px;
   width: min(85vw, 40ch);
   height: 60vh;
