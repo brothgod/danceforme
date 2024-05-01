@@ -1,7 +1,8 @@
 body {
   font-family: monospace;
   width: 100%;
-  font-size: large;
+  font-size: medium;
+  color: #0d1321;
 }
 
 /* controls start */
@@ -15,21 +16,21 @@ body {
   width: 100%;
 }
 
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  background-color: #f1f1f1;
-}
-
 li {
   display: block;
-  color: #000;
   margin: 20px;
-  /* margin-top: 20px;
-  margin-right: 20px; */
   text-decoration: none;
+}
+
+p {
+  /* display: inline;
+  color: #0d1321;
+  background-color: #ffeddf;
+  padding: 3px; */
+}
+
+label {
+  color: lightcoral;
 }
 
 #top-right {
@@ -40,6 +41,12 @@ li {
   float: left;
 }
 
+#bottom-right {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+}
+
 li a {
   text-decoration: none;
   background-color: white;
@@ -48,13 +55,58 @@ li a {
 }
 
 li a:hover {
-  background-color: #555;
-  color: white;
+  background-color: #0d1321;
+  color: #ffeddf;
 }
 
-/* toggle start */
+/* pop-up start */
 
-input {
+.popup {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: none;
+}
+
+.popup-content {
+  background-color: #0d1321;
+  color: #ffeddf;
+  margin: 100px auto;
+  padding: 24px 32px;
+  width: min(85vw, 40ch);
+  height: 60vh;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px #858ebc;
+  overflow-y: scroll;
+  cursor: pointer;
+}
+
+.popup-content a:hover {
+  margin: auto;
+  color: #0d1321;
+  background-color: #ffeddf;
+}
+
+.show {
+  display: block;
+}
+
+pre {
+  white-space: pre-wrap;
+  display: block;
+  margin: 1em 0px;
+  /* font-size: medium; */
+}
+
+/* pop-up end */
+
+/* filter toggle start */
+
+/* input {
   cursor: pointer;
   position: relative;
   width: 50px;
@@ -63,10 +115,10 @@ input {
   outline: none;
   background-color: #ccc;
   -webkit-appearance: none;
-  /* transition: background .3s;rgba(0,0,0,0.15); */
-}
+  transition: background .3s;rgba(0,0,0,0.15);
+} */
 
-input::after {
+/* input::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -77,17 +129,17 @@ input::after {
   width: 1rem;
   background-color: white;
   transition: left 0.3s;
-}
+} */
 
-input:checked {
+/* input:checked {
   background-color: pink;
 }
 
 input:checked::after {
   left: 70%;
-}
+} */
 
-/* toggle end */
+/* filter toggle end */
 
 /* controls end  */
 
