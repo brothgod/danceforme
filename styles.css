@@ -20,6 +20,7 @@ li {
   display: block;
   margin: 20px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 p {
@@ -34,17 +35,33 @@ label {
 }
 
 #top-right {
-  text-align: right;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+}
+
+#top-right2 {
+  position: fixed;
+  top: 25px;
+  right: 0px;
 }
 
 #top-left {
-  float: left;
+  position: fixed;
+  top: 0px;
+  left: 0px;
 }
 
 #bottom-right {
   position: fixed;
   bottom: 0px;
   right: 0px;
+}
+
+#bottom-left {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
 }
 
 li a {

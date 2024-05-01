@@ -23,93 +23,96 @@
       
       3. upload a .wav file in "manage samples" in order to use it for audio manipulation 
 
-        4. press the toggle on the right to switch between stick figure mode and webcam mode 
+        4. use "switch view" to toggle between stick figure mode and webcam mode 
 
       5. stand far enough from the webcam so that your whole body is in view
     
     6. dance 4 me ! ! !</pre>
-    <br>
+          <br />
           <a id="closeInfo">– close —</a>
         </div>
       </div>
       <script>
-      openInfo.addEventListener("click", function () {
-        infoPopup.classList.add("show");
-      });
-      closeInfo.addEventListener("click", function () {
-        infoPopup.classList.remove("show");
-      });
-      window.addEventListener("click", function (event) {
-        if (event.target == infoPopup) {
+        openInfo.addEventListener("click", function () {
+          infoPopup.classList.add("show");
+        });
+        closeInfo.addEventListener("click", function () {
           infoPopup.classList.remove("show");
-        }
-      });
+        });
+        window.addEventListener("click", function (event) {
+          if (event.target == infoPopup) {
+            infoPopup.classList.remove("show");
+          }
+        });
       </script>
-      <li id="top-right"><a id="webcamButton">&#8594 enable webcam</a></li>
-      <li id="top-right"><a id="openSettings">&#8594 sound settings</a></li>
-        <div id="settingsPopup" class="popup">
-          <div class="popup-content">
-            <pre>   : *   ･ﾟﾟ✼  :‧₊˚ ‧₊˚  ‧₊˚  ₊  *･ﾟﾟ</pre>
-            <br>
-            <p>sound manipulation effects</p>
-            <div>
-              <!-- change id and name to real mappings -->
-              <input type="checkbox" id="scales" name="scales" unchecked />
-              <label for="scales">reverberation</label>
-              <br>
+      <li id="top-right"><a id="webcamButton">enable webcam</a></li>
+      <li id="top-right2"><a id="openSettings">sound settings</a></li>
+      <div id="settingsPopup" class="popup">
+        <div class="popup-content">
+          <pre>   : *   ･ﾟﾟ✼  :‧₊˚ ‧₊˚  ‧₊˚  ₊  *･ﾟﾟ</pre>
+          <br />
+          <p>sound manipulation effects</p>
+          <div>
+            <!-- change id and name to real mappings -->
+            <input type="checkbox" id="scales" name="scales" unchecked />
+            <label for="scales">reverberation</label>
+            <br />
 
-              <input type="checkbox" id="scales" name="scales" unchecked />
-              <label for="scales">feedback delay</label>
-              <br>
+            <input type="checkbox" id="scales" name="scales" unchecked />
+            <label for="scales">feedback delay</label>
+            <br />
 
-              <input type="checkbox" id="scales" name="scales" unchecked />
-              <label for="scales">muffling</label>
-              <br>
+            <input type="checkbox" id="scales" name="scales" unchecked />
+            <label for="scales">muffling</label>
+            <br />
 
-              <input type="checkbox" id="scales" name="scales" unchecked />
-              <label for="scales">loop size</label>
-            </div>
-            <br>
-            <br>
-            <br>
-            <p>number of people = <label><output id="value"></output></label></p>
-            <div>
-              <input id="numPeople" type="range" min="1" max="5" step="1" />
-              <script>
+            <input type="checkbox" id="scales" name="scales" unchecked />
+            <label for="scales">loop size</label>
+          </div>
+          <br />
+          <br />
+          <br />
+          <p>
+            number of people =
+            <label><output id="value"></output></label>
+          </p>
+          <div>
+            <input id="numPeople" type="range" min="1" max="5" step="1" />
+            <script>
               const value = document.querySelector("#value");
               const numPeople = document.querySelector("#numPeople");
               value.textContent = numPeople.value;
               numPeople.addEventListener("input", (event) => {
                 value.textContent = event.target.value;
               });
-              </script>
-            </div>
-            <br>
-            <br>
-            <a id="closeSettings">– close —</a>
+            </script>
           </div>
+          <br />
+          <br />
+          <a id="closeSettings">– close —</a>
         </div>
+      </div>
       <script>
-      openSettings.addEventListener("click", function () {
-        settingsPopup.classList.add("show");
-      });
-      closeSettings.addEventListener("click", function () {
-        settingsPopup.classList.remove("show");
-      });
-      window.addEventListener("click", function (event) {
-        if (event.target == settingsPopup) {
+        openSettings.addEventListener("click", function () {
+          settingsPopup.classList.add("show");
+        });
+        closeSettings.addEventListener("click", function () {
           settingsPopup.classList.remove("show");
-        }
-      });
+        });
+        window.addEventListener("click", function (event) {
+          if (event.target == settingsPopup) {
+            settingsPopup.classList.remove("show");
+          }
+        });
       </script>
-      <li id="top-right"><input type="checkbox" /></li>
-      <li id="bottom-right"><a id="openSamples">&#8594 manage samples</a></li>
+      <li id="bottom-left"><a>switch view</a></li>
+      <li id="bottom-right"><a id="openSamples">manage samples</a></li>
       <div id="samplesPopup" class="popup">
         <div class="popup-content">
           <input type="file" id="audioFileInput" />
-          <br>
-          <br>
-          <br>
+          <br />
+          <br />
+          <br />
           <a id="closeSamples">– close —</a>
         </div>
       </div>
@@ -125,7 +128,7 @@
             samplesPopup.classList.remove("show");
           }
         });
-        </script>
+      </script>
       <br />
       <br />
       <br />
@@ -149,7 +152,7 @@
       <label for="numPeople">Number of People:</label>
       <input type="number" id="numPeople" value="2" />
     </div>
-    <!-- <div id="liveView" class="videoView">
+    <div id="liveView" class="videoView">
       <div style="width: 100%; height: 100%; position: relative">
         <video
           id="webcam"
@@ -164,7 +167,7 @@
           height="720px"
           style="left: 0px; top: 0px; background: rgb(253, 18, 92)"
         ></canvas>
-      </div> -->
+      </div>
     </div>
     <!-- uncomment this—this is all the webcam div stuff -->
     <script type="module" src="script.js"></script>
