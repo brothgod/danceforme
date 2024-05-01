@@ -1,42 +1,47 @@
-/* Copyright 2023 The MediaPipe Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License. */
-
-/* @use "@material"; */
 body {
-  font-family: roboto;
-  /* margin: 2em; */
-  color: #3d3d3d;
-  --mdc-theme-primary: #007f8b;
-  --mdc-theme-on-primary: #f1f3f4;
+  font-family: monospace;
+  width: 100%;
 }
 
-/* nav bar start */
+/* controls start */
+
+#controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  list-style-type: none;
+  width: 100%;
+}
 
 ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  width: 200px;
+  width: 100%;
   background-color: #f1f1f1;
 }
 
-li a {
+li {
   display: block;
   color: #000;
-  /* padding: 8px 16px; */
+  margin: 20px;
+  /* margin-top: 20px;
+  margin-right: 20px; */
+  /* padding: 5px; */
   text-decoration: none;
+}
+
+#top-right {
   text-align: right;
+}
+
+#top-left {
+  float: left;
+}
+
+li a {
+  text-decoration: none;
 }
 
 li a:hover {
@@ -44,7 +49,46 @@ li a:hover {
   color: white;
 }
 
-/* nav bar end  */
+/* toggle start */
+
+input {
+  cursor: pointer;
+  position: relative;
+  width: 50px;
+  height: 30px;
+  border-radius: 25px;
+  outline: none;
+  background-color: #ccc;
+  -webkit-appearance: none;
+  /* transition: background .3s;rgba(0,0,0,0.15); */
+}
+
+input::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  background-color: white;
+  transition: left 0.3s;
+}
+
+input:checked {
+  background-color: pink;
+}
+
+input:checked::after {
+  left: 70%;
+}
+
+/* toggle end */
+
+/* controls end  */
+
+/* webcam stuff start */
 
 video {
   clear: both;
@@ -52,11 +96,6 @@ video {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
   -moz-transform: rotateY(180deg);
-}
-
-section {
-  opacity: 1;
-  transition: opacity 500ms ease-in-out;
 }
 
 .invisible {
@@ -68,13 +107,6 @@ section {
   float: left;
   width: 100%;
   cursor: pointer;
-}
-
-.highlighter {
-  background: rgba(0, 255, 0, 0.25);
-  border: 1px dashed #fff;
-  z-index: 1;
-  position: absolute;
 }
 
 .canvas {
@@ -89,15 +121,10 @@ section {
   -moz-transform: rotateY(180deg);
 }
 
-#controls {
+#liveView {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
 }
 
-#liveView{
-  position: absolute;
-  top: 0;
-  left: 0;
-}
+/* webcam stuff end */
