@@ -122,7 +122,6 @@ async function predictWebcam() {
 
       let rightArmAngle = 0;
       let leftArmAngle = 0;
-      let hipAngle = 0;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
@@ -132,9 +131,9 @@ async function predictWebcam() {
         leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
       }
 
-      let rightFootDiff;
-      let leftFootDiff;
-      let headDiff;
+      let rightFootDiff = null;
+      let leftFootDiff = null;
+      let headDiff = null;
 
       if (count % interval == 0) {
         if (result.landmarks.length == numPeople.value) {
@@ -246,13 +245,16 @@ function adjustPlayerEffects(
   let playbackRate = headDiff;
   let distort = rightFootDiff;
 
-  if (playbackRateFlag)
-    player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8));
+  console.log("old feedback: " + feedbackDelay.feedback.value + ". new feedback: " + feedback);
   reverb.decay = parseFloat(clamp(decay, 0.2, 1.8));
-  distortion.distortion = parseFloat(clamp(distort, 0.2, 1.8));
   feedbackDelay.delay = parseFloat(clamp(delay, 0.2, 1.8));
-  feedbackDelay.feedback = parseFloat(clamp(feedback, 0.2, 1.8));
-  pitchShift.pitch = parseFloat(clamp(pitch, 0.2, 1.8));
+  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0.2, 1.8));
+
+  if(pitch !== null)
+    distortion.distortion = parseFloat(clamp(distort, 0.2, 1.8));
+    pitchShift.pitch = parseFloat(clamp(pitch, 0.2, 1.8));
+    if (playbackRateFlag)
+      player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8));
 }
 
 function angleWithXAxis(x, y) {
