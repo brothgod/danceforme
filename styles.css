@@ -11,7 +11,6 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
   list-style-type: none;
   width: 100%;
 }
@@ -42,42 +41,55 @@ li a:hover {
   position: fixed;
   top: 0px;
   right: 0px;
+  z-index: 2;
 }
 
 #top-right2 {
   position: fixed;
   top: 25px;
   right: 0px;
+  z-index: 2;
 }
 
 #top-left {
   position: fixed;
   top: 0px;
   left: 0px;
+  z-index: 2;
 }
 
 #bottom-right {
   position: fixed;
   bottom: 0px;
   right: 0px;
+  z-index: 2;
 }
 
 #bottom-right2 {
+  z-index: 1;
   position: fixed;
-  bottom: 25px;
-  right: 0px;
+  bottom: 0;
+  width: 93%;
+  display: flex;
+  justify-content: center;
+}
+
+audio {
+  width: 40vw;
 }
 
 #bottom-right3 {
   position: fixed;
   bottom: 25px;
   right: 50px;
+  z-index: 2;
 }
 
 #bottom-left {
   position: fixed;
   bottom: 0px;
   left: 0px;
+  z-index: 2;
 }
 
 label {

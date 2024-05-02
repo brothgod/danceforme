@@ -239,29 +239,29 @@ function adjustPlayerEffects(
   // let pitch = headDiff;
 
   let decay = leftArmAngle;
-  let feedback = rightArmAngle;
-  let delay = rightArmAngle;
+  let feedback = (rightArmAngle + 90) / 180;
+  let delay = (rightArmAngle + 90) / 180;
   let pitch = leftFootDiff;
   let playbackRate = headDiff;
   let distort = rightFootDiff;
 
-  console.log("Decay: "+decay);
-  console.log("Feedback: "+feedback);
-  console.log("Delay: "+delay);
-  console.log("Pitch: "+pitch);
-  console.log("PlaybackRate: "+playbackRate);
-  console.log("Distort: "+distort);
+  console.log("Decay: " + decay);
+  console.log("Feedback: " + feedback);
+  console.log("Delay: " + delay);
+  console.log("Pitch: " + pitch);
+  console.log("PlaybackRate: " + playbackRate);
+  console.log("Distort: " + distort);
   console.log("------------------");
 
   reverb.decay = parseFloat(clamp(decay, 0.2, 1.8));
-  feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.2, 1.8)); //seconds, any value
-  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 1)); //between [0,1]
+  feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
+  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
 
-  if(pitch !== null)
+  if (pitch !== null)
     distortion.distortion = parseFloat(clamp(distort, 0, 1000)); //between [0,1]
-    pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
-    if (playbackRateFlag)
-      player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8)); // [.2, 1.8]
+  pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
+  if (playbackRateFlag)
+    player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8)); // [.2, 1.8]
 }
 
 function angleWithXAxis(x, y) {
