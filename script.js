@@ -277,7 +277,6 @@ function angleWithXAxis(x, y) {
 }
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
-
 let player = new Tone.Player();
 let pitchShift = new Tone.PitchShift().toDestination();
 let reverb = new Tone.Reverb().toDestination();
@@ -290,7 +289,10 @@ function handleFileUpload(event) {
   //const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
   const fileUrl = URL.createObjectURL(file);
   Tone.start();
-  player = new Tone.Player(fileUrl).toDestination();
+
+  const audioElement = document.getElementById("audioElement");
+  audioElement.src = fileUrl;
+  player = Tone.getContext().createMediaElementSource(audioElement);
   setUpEffects(player);
 }
 
@@ -311,7 +313,7 @@ function setUpEffects(tonePlayer) {
       console.log(checkbox.value + " is checked.");
       if (checkbox.value === "playbackRate") {
         playbackRateFlag = true;
-      } else tonePlayer.connect(map[checkbox.value]);
+      } else Tone.connect(tonePlayer, map[checkbox.value]);
     }
   });
 }
@@ -321,15 +323,15 @@ const playButton = document.getElementById("playButton");
 const stopButton = document.getElementById("stopButton");
 const audioFileInput = document.getElementById("audioFileInput");
 
-// Add event listeners to UI elements
-playButton.addEventListener("click", () => {
-  // Start playback
-  player.start();
-});
+// // Add event listeners to UI elements
+// playButton.addEventListener("click", () => {
+//   // Start playback
+//   player.start();
+// });
 
-stopButton.addEventListener("click", () => {
-  // Stop playback
-  player.stop();
-});
+// stopButton.addEventListener("click", () => {
+//   // Stop playback
+//   player.stop();
+// });
 
 audioFileInput.addEventListener("change", handleFileUpload);

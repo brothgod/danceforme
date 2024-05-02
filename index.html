@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dance 4 me !</title>
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.9.17/Tone.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -160,14 +160,13 @@
         });
       </script>
       <!-- <li id="bottom-left"><a>switch view</a></li> -->
-      <li id="bottom-right3"><button id="playButton">Play</button></li>
-      <li id="bottom-right2"><button id="stopButton">Stop</button></li>
-      <!-- <li id="bottom-right2">
-        <audio controls>
-          <source src="horse.ogg" type="audio/wav" />
+      <!-- <li id="bottom-right3"><button id="playButton">Play</button></li>
+      <li id="bottom-right2"><button id="stopButton">Stop</button></li> -->
+      <li id="bottom-right3">
+        <audio controls id="audioElement">
           Your browser does not support the audio element.
         </audio>
-      </li> -->
+      </li>
       <li id="bottom-right"><a id="openSamples">upload sample</a></li>
       <div id="samplesPopup" class="popup">
         <div class="popup-content">
