@@ -233,14 +233,19 @@ function adjustPlayerEffects(
 ) {
   //Formulas to get effect attributes. TODO: fiddle with these till they sound right
   let playbackRate = (rightArmAngle + 90) / 90;
-  let reverbDecay = headDiff;
-  let distortion = rightFootDiff;
-  let feedbackDelay = leftFootDiff;
-  let feedbackFeedback = leftFootDiff;
   let pitch = leftArmAngle;
+  let distort = rightFootDiff;
+  let delay = leftFootDiff; 
+  let feedback = leftFootDiff;
+  let decay = headDiff;
 
-  reverb.decay = reverbDecay;
-  player.playbackRate = parseFloat(Math.max(playbackRate, 0.2));
+  if(playbackRateFlag)
+    player.playbackRate = parseFloat(clamp(playbackRate, 0.2,1.8));
+  reverb.decay = parseFloat(clamp(decay, 0.2,1.8));
+  distortion.distortion = parseFloat(clamp(distort, 0.2,1.8));
+  feedbackDelay.delay = parseFloat(clamp(delay, 0.2,1.8));
+  feedbackDelay.feedback = parseFloat(clamp(feedback, 0.2,1.8));
+  pitchShift.pitch = parseFloat(clamp(pitch, 0.2,1.8));
 }
 
 function angleWithXAxis(x, y) {
@@ -282,6 +287,7 @@ function setUpEffects(tonePlayer) {
 
   // Loop through each checkbox
   checkboxes.forEach(function (checkbox) {
+    playbackRateFlag = false;
     // Check if the checkbox is checked
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
