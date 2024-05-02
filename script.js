@@ -257,7 +257,7 @@ function adjustPlayerEffects(
     distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     if (playbackRateFlag) {
-      player.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
+      audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
     }
     console.log("PlaybackRate: " + playbackRate);
     console.log("Pitch: " + pitch);
@@ -283,6 +283,7 @@ let reverb = new Tone.Reverb().toDestination();
 let distortion = new Tone.Distortion().toDestination();
 let feedbackDelay = new Tone.FeedbackDelay().toDestination();
 let playbackRateFlag = false;
+const audioElement = document.getElementById("audioElement");
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -290,7 +291,6 @@ function handleFileUpload(event) {
   const fileUrl = URL.createObjectURL(file);
   Tone.start();
 
-  const audioElement = document.getElementById("audioElement");
   audioElement.src = fileUrl;
   player = Tone.getContext().createMediaElementSource(audioElement);
   Tone.connect(player, Tone.getDestination());
