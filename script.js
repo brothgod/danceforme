@@ -120,8 +120,8 @@ async function predictWebcam() {
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-      let rightArmAngle = 0;
-      let leftArmAngle = 0;
+      let rightArmAngle = -1;
+      let leftArmAngle = -1;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
@@ -131,9 +131,9 @@ async function predictWebcam() {
         leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
       }
 
-      let rightFootDiff = null;
-      let leftFootDiff = null;
-      let headDiff = null;
+      let rightFootDiff = -1;
+      let leftFootDiff = -1;
+      let headDiff = -1;
 
       if (count % interval == 0) {
         if (result.landmarks.length == numPeople.value) {
@@ -151,7 +151,7 @@ async function predictWebcam() {
 
       // console.log("Right arm angle: " + rightArmAngle);
       // console.log("Left arm angle: " + leftArmAngle);
-      if (count % interval == 0) {
+      //if (count % interval == 0) {
       adjustPlayerEffects(
         rightArmAngle,
         leftArmAngle,
@@ -159,7 +159,7 @@ async function predictWebcam() {
         leftFootDiff,
         headDiff
       );
-      }
+      //}
 
       canvasCtx.restore();
     });
@@ -240,13 +240,13 @@ function adjustPlayerEffects(
   // let feedback = leftFootDiff;
   // let pitch = headDiff;
 
-  if(reverbFlag.value){
+  if(reverbFlag.value && leftArmAngle !== -1){
     let decay = leftArmAngle;
     reverb.decay = parseFloat(clamp(decay, 50, 350));
     console.log("Decay: " + decay);
   }
 
-  if(feedbackDelayFlag.value){
+  if(feedbackDelayFlag.value && rightArmAngle !== -1){
     let feedback = (rightArmAngle + 90) / 180;
     let delay = (rightArmAngle + 90) / 180;
     feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
@@ -255,19 +255,19 @@ function adjustPlayerEffects(
     console.log("Delay: " + delay);
   }
 
-  if(pitchShiftFlag.value){
+  if(pitchShiftFlag.value && leftFootDiff !== -1){
     let pitch = Math.abs(leftFootDiff * 60);
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     console.log("Pitch: " + pitch);
   }
 
-  if(playbackRateFlag.value){
+  if(playbackRateFlag.value && headDiff !== -1){
     let playbackRate = Math.abs(headDiff * 10) + 0.3;
     audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
     console.log("PlaybackRate: " + playbackRate);
   }
 
-  if(distortionFlag.value){
+  if(distortionFlag.value && rightFootDiff !== -1){
     let distort = Math.abs(rightFootDiff * 5000);
     distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
     console.log("Distort: " + distort);
