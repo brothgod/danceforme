@@ -260,6 +260,7 @@ const pitchShift = new Tone.PitchShift();
 const reverb = new Tone.Reverb();
 const distortion = new Tone.Distortion();
 const feedbackDelay = new Tone.FeedbackDelay();
+let playbackRateFlag = false;
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -284,7 +285,11 @@ function setUpEffects(tonePlayer) {
     // Check if the checkbox is checked
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
-      tonePlayer.connect(map[checkbox.value]);
+      if(checkbox.value==="playbackRate"){
+        playbackRateFlag = true; 
+      }
+      else
+        tonePlayer.connect(map[checkbox.value]);
     }
   });
   tonePlayer.toDestination();
@@ -293,7 +298,6 @@ function setUpEffects(tonePlayer) {
 // Get references to UI elements
 const playButton = document.getElementById("playButton");
 const stopButton = document.getElementById("stopButton");
-const playbackRateInput = document.getElementById("playbackRate");
 const audioFileInput = document.getElementById("audioFileInput");
 
 // Add event listeners to UI elements
@@ -305,12 +309,6 @@ playButton.addEventListener("click", () => {
 stopButton.addEventListener("click", () => {
   // Stop playback
   player.stop();
-});
-
-// Update playback rate based on input value
-playbackRateInput.addEventListener("input", function () {
-  player.playbackRate = parseFloat(this.value);
-  console.log(this.value);
 });
 
 audioFileInput.addEventListener("change", handleFileUpload);
