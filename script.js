@@ -128,29 +128,38 @@ async function predictWebcam() {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
         // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        rightArmAngle += calcRightArmAngle(landmark) / result.landmarks.length
+        rightArmAngle += calcRightArmAngle(landmark) / result.landmarks.length;
         leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
       }
 
-      if(count%interval==0){
-        if(result.landmarks.length==numPeople.value){
-          let rightFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 28);
-          let leftFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 27);
-          let headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks , 0);
+      let rightFootDiff;
+      let leftFootDiff;
+      let headDiff;
+
+      if (count % interval == 0) {
+        if (result.landmarks.length == numPeople.value) {
+          rightFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 28);
+          leftFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 27);
+          headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 0);
           lastLandmarks = result.landmarks;
           count = 0;
           console.log("Feet difference: " + rightFootDiff);
           console.log("Head Difference: " + headDiff);
-        }
-        else{
+        } else {
           count--;
         }
       }
-      
+
       console.log("Right arm angle: " + rightArmAngle);
       console.log("Left arm angle: " + leftArmAngle);
-      adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff);
-      
+      adjustPlayerEffects(
+        rightArmAngle,
+        leftArmAngle,
+        rightFootDiff,
+        leftFootDiff,
+        headDiff
+      );
+
       canvasCtx.restore();
     });
   }
@@ -161,7 +170,8 @@ async function predictWebcam() {
   }
 }
 
-function calcRightArmAngle(landmark){ //Returns angle between -90 and 90
+function calcRightArmAngle(landmark) {
+  //Returns angle between -90 and 90
   let rightShoulder = landmark[12];
   let rightElbow = landmark[14];
 
@@ -175,7 +185,8 @@ function calcRightArmAngle(landmark){ //Returns angle between -90 and 90
   return clamp(positiveAngle - 180, -90, 90);
 }
 
-function calcLeftArmAngle(landmark){  //Returns angle between -90 and 90
+function calcLeftArmAngle(landmark) {
+  //Returns angle between -90 and 90
   let leftShoulder = landmark[11];
   let leftElbow = landmark[13];
 
@@ -187,18 +198,23 @@ function calcLeftArmAngle(landmark){  //Returns angle between -90 and 90
   return clamp(-1 * angle, -90, 90);
 }
 
-function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum){//Returns x-difference of pose number
-  if(pastLandmarks==null){
+function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum) {
+  //Returns x-difference of pose number
+  if (pastLandmarks == null) {
     return 0;
   }
-  let landmarkX = landmarks.map(landmark => {return landmark[landmarkNum].x});
-  let pastLandmarkX = pastLandmarks.map(landmark => {return landmark[landmarkNum].x});
+  let landmarkX = landmarks.map((landmark) => {
+    return landmark[landmarkNum].x;
+  });
+  let pastLandmarkX = pastLandmarks.map((landmark) => {
+    return landmark[landmarkNum].x;
+  });
   landmarkX.sort();
   pastLandmarkX.sort();
 
   let differences = 0;
-  for(let i = 0; i < numPeople.value; i+=1){
-    differences+=landmarkX[i]-pastLandmarkX[i];
+  for (let i = 0; i < numPeople.value; i += 1) {
+    differences += landmarkX[i] - pastLandmarkX[i];
   }
 
   return differences / numPeople.value;
@@ -208,13 +224,19 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff){
+function adjustPlayerEffects(
+  rightArmAngle,
+  leftArmAngle,
+  rightFootDiff,
+  leftFootDiff,
+  headDiff
+) {
   //Formulas to get effect attributes. TODO: fiddle with these till they sound right
   let playbackRate = (rightArmAngle + 90) / 90;
   let reverbDecay = headDiff;
   let distortion = rightFootDiff;
   let feedbackDelay = leftFootDiff;
-  let feedbackFeedback = leftFootDiff; 
+  let feedbackFeedback = leftFootDiff;
   let pitch = leftArmAngle;
 
   reverb.decay = reverbDecay;
@@ -236,7 +258,7 @@ function angleWithXAxis(x, y) {
 let player = new Tone.Player();
 const pitchShift = new Tone.PitchShift();
 const reverb = new Tone.Reverb();
-const distortion = new Tone.Distortion(); 
+const distortion = new Tone.Distortion();
 const feedbackDelay = new Tone.FeedbackDelay();
 
 function handleFileUpload(event) {
@@ -248,15 +270,20 @@ function handleFileUpload(event) {
   setUpEffects(player);
 }
 
-function setUpEffects(tonePlayer){
+function setUpEffects(tonePlayer) {
   var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  let map = {"pitchShift":pitchShift, "reverb":reverb, "distortion":distortion, "feedbackDelay":feedbackDelay};
+  let map = {
+    pitchShift: pitchShift,
+    reverb: reverb,
+    distortion: distortion,
+    feedbackDelay: feedbackDelay,
+  };
 
   // Loop through each checkbox
-  checkboxes.forEach(function(checkbox) {
+  checkboxes.forEach(function (checkbox) {
     // Check if the checkbox is checked
     if (checkbox.checked) {
-      console.log(checkbox.value + ' is checked.');
+      console.log(checkbox.value + " is checked.");
       tonePlayer.connect(map[checkbox.value]);
     }
   });
