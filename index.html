@@ -15,9 +15,9 @@
         <div class="popup-content">
           <pre>hi! 
 
-            welcome to dance4me — an interactive audio manipulator that uses mediapipe pose landmark detection and tone.js audio effects to create a sound experience <span style="color: lightcoral;">that reacts to you as you react to it</span>
+            welcome to dance4me — an interactive audio manipulator that uses <a href="https://developers.google.com/mediapipe/solutions/vision/pose_landmarker" target="_blank">mediapipe pose landmark detection</a> and <a href="https://tonejs.github.io/" target="_blank">tone.js</a> audio effects to create a sound experience <span style="color: lightcoral;">that reacts to you as you react to it</span>
             
-    1. click "enable webcam" to turn on the camera to begin using landmark motion detection
+    1. click "enable webcam" to turn on the camera to begin using pose landmark detection
 
         2. use "sound settings" to change the number of people that show up in view and add/remove sound manipulation effects to the sample
       
@@ -49,33 +49,63 @@
       <li id="top-right2"><a id="openSettings">sound settings</a></li>
       <div id="settingsPopup" class="popup">
         <div class="popup-content">
-          <pre>   : *   ･ﾟﾟ✼  :‧₊˚ ‧₊˚  ‧₊˚  ₊  *･ﾟﾟ</pre>
-          <br />
+          <!-- <pre>   : *   ･ﾟﾟ✼  :‧₊˚ ‧₊˚  ‧₊˚  ₊  *･ﾟﾟ</pre> -->
           <p>sound manipulation effects</p>
+          <br />
+          <br />
+          <small>
+            check/uncheck any combination of the sound effects below to use on
+            the song sample
+          </small>
+          <br />
+          <br />
           <div>
             <!-- change id and name to real mappings -->
-            <input type="checkbox" id="scales" name="scales" unchecked />
+            <input type="checkbox" id="scales" name="scales" checked />
             <label for="scales">reverberation</label>
             <br />
-
-            <input type="checkbox" id="scales" name="scales" unchecked />
+            <input type="checkbox" id="scales" name="scales" checked />
             <label for="scales">feedback delay</label>
             <br />
-
-            <input type="checkbox" id="scales" name="scales" unchecked />
+            <input type="checkbox" id="scales" name="scales" checked />
             <label for="scales">muffling</label>
             <br />
-
-            <input type="checkbox" id="scales" name="scales" unchecked />
+            <input
+              type="checkbox"
+              id="playbackRate"
+              name="playbackRate"
+              checked
+            />
+            <label for="playbackRate">playback rate</label>
+            <br />
+            <input type="checkbox" id="scales" name="scales" checked />
             <label for="scales">loop size</label>
+            <br />
+            <input type="checkbox" id="scales" name="scales" checked />
+            <label for="scales">effect6</label>
+            <br />
+            <input type="checkbox" id="scales" name="scales" checked />
+            <label for="scales">effect7</label>
+            <br />
+            <input type="checkbox" id="scales" name="scales" checked />
+            <label for="scales">effect8</label>
+            <br />
           </div>
-          <br />
           <br />
           <br />
           <p>
             number of people =
-            <label><output id="value"></output></label>
+            <label style="color: #0d1321"><output id="value"></output></label>
           </p>
+          <br />
+          <br />
+          <small>
+            move the slider to adjust the # of persons detected by the webcam —
+            <br />
+            min is 1 and max is 5
+          </small>
+          <br />
+          <br />
           <div>
             <input id="numPeople" type="range" min="1" max="5" step="1" />
             <script>
@@ -87,7 +117,6 @@
               });
             </script>
           </div>
-          <br />
           <br />
           <a id="closeSettings">– close —</a>
         </div>
@@ -106,6 +135,8 @@
         });
       </script>
       <li id="bottom-left"><a>switch view</a></li>
+      <li id="bottom-right2"><button id="playButton">Play</button></li>
+      <li id="bottom-right3"><button id="stopButton">Stop</button></li>
       <li id="bottom-right"><a id="openSamples">manage samples</a></li>
       <div id="samplesPopup" class="popup">
         <div class="popup-content">
@@ -144,13 +175,11 @@
       <br />
       <br />
       <br />
-      <label for="playbackRate">Playback Rate:</label>
-      <input type="number" id="playbackRate" value="1" step="0.1" />
-      <button id="playButton">Play</button>
-      <button id="stopButton">Stop</button>
+      <!-- <label for="playbackRate">Playback Rate:</label>
+      <input type="number" id="playbackRate" value="1" step="0.1" /> -->
       <br />
-      <label for="numPeople">Number of People:</label>
-      <input type="number" id="numPeople" value="2" />
+      <!-- <label for="numPeople">Number of People:</label>
+      <input type="number" id="numPeople" value="2" /> -->
     </div>
     <div id="liveView" class="videoView">
       <div style="width: 100%; height: 100%; position: relative">
