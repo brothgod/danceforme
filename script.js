@@ -232,20 +232,27 @@ function adjustPlayerEffects(
   headDiff
 ) {
   //Formulas to get effect attributes. TODO: fiddle with these till they sound right
-  let playbackRate = (rightArmAngle + 90) / 90;
-  let pitch = leftArmAngle;
-  let distort = rightFootDiff;
-  let delay = leftFootDiff; 
-  let feedback = leftFootDiff;
-  let decay = headDiff;
+  // let playbackRate = (rightArmAngle + 90) / 90;
+  // let decay = leftArmAngle;
+  // let distort = rightFootDiff;
+  // let delay = leftFootDiff;
+  // let feedback = leftFootDiff;
+  // let pitch = headDiff;
 
-  if(playbackRateFlag)
-    player.playbackRate = parseFloat(clamp(playbackRate, 0.2,1.8));
-  reverb.decay = parseFloat(clamp(decay, 0.2,1.8));
-  distortion.distortion = parseFloat(clamp(distort, 0.2,1.8));
-  feedbackDelay.delay = parseFloat(clamp(delay, 0.2,1.8));
-  feedbackDelay.feedback = parseFloat(clamp(feedback, 0.2,1.8));
-  pitchShift.pitch = parseFloat(clamp(pitch, 0.2,1.8));
+  let decay = leftArmAngle;
+  let feedback = rightArmAngle;
+  let delay = rightArmAngle;
+  let pitch = leftFootDiff;
+  let playbackRate = headDiff;
+  let distort = rightFootDiff;
+
+  if (playbackRateFlag)
+    player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8));
+  reverb.decay = parseFloat(clamp(decay, 0.2, 1.8));
+  distortion.distortion = parseFloat(clamp(distort, 0.2, 1.8));
+  feedbackDelay.delay = parseFloat(clamp(delay, 0.2, 1.8));
+  feedbackDelay.feedback = parseFloat(clamp(feedback, 0.2, 1.8));
+  pitchShift.pitch = parseFloat(clamp(pitch, 0.2, 1.8));
 }
 
 function angleWithXAxis(x, y) {
@@ -291,11 +298,9 @@ function setUpEffects(tonePlayer) {
     // Check if the checkbox is checked
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
-      if(checkbox.value==="playbackRate"){
-        playbackRateFlag = true; 
-      }
-      else
-        tonePlayer.connect(map[checkbox.value]);
+      if (checkbox.value === "playbackRate") {
+        playbackRateFlag = true;
+      } else tonePlayer.connect(map[checkbox.value]);
     }
   });
   tonePlayer.toDestination();
