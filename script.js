@@ -254,7 +254,7 @@ function adjustPlayerEffects(
   feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
 
   if (leftFootDiff !== null) {
-    distortion.distortion = parseFloat(clamp(distort, 0, 1000)); //between [0,1]
+    distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     if (playbackRateFlag) {
       player.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]

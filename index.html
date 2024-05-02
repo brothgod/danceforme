@@ -21,13 +21,12 @@
 
         2. use "sound settings" to change the number of people that show up in view and add/remove sound manipulation effects to the sample
       
-      3. upload a .wav file in "manage samples" in order to use it for audio manipulation 
+      3. select a .wav file using "upload sample" in order to use it for audio manipulation 
 
-        4. use "switch view" to toggle between stick figure mode and webcam mode 
-
-      5. stand far enough from the webcam so that your whole body is in view
+      4. stand far enough from the webcam so that your whole body is in view
     
-    6. dance 4 me ! ! !</pre>
+    5. dance 4 me ! ! !</pre>
+          <!-- <pre>4. use "switch view" to toggle between stick figure mode and webcam mode </pre> -->
           <br />
           <a id="closeInfo">– close —</a>
           <br />
@@ -73,12 +72,14 @@
             />
             <label for="feedbackDelay">feedback delay</label>
             <br />
-            <input
+            <!-- <input
               type="checkbox"
               value="distortion"
               name="distortion"
               unchecked
             />
+            <label for="distortion">distortion</label> uncomment this for the real distortion-->
+            <input type="checkbox" name="distortion" unchecked />
             <label for="distortion">distortion</label>
             <br />
             <input
@@ -158,16 +159,16 @@
           }
         });
       </script>
-      <li id="bottom-left"><a>switch view</a></li>
-      <li id="bottom-right2"><button id="playButton">Play</button></li>
-      <li id="bottom-right3"><button id="stopButton">Stop</button></li>
+      <!-- <li id="bottom-left"><a>switch view</a></li> -->
+      <li id="bottom-right3"><button id="playButton">Play</button></li>
+      <li id="bottom-right2"><button id="stopButton">Stop</button></li>
       <!-- <li id="bottom-right2">
         <audio controls>
           <source src="horse.ogg" type="audio/wav" />
           Your browser does not support the audio element.
         </audio>
       </li> -->
-      <li id="bottom-right"><a id="openSamples">manage samples</a></li>
+      <li id="bottom-right"><a id="openSamples">upload sample</a></li>
       <div id="samplesPopup" class="popup">
         <div class="popup-content">
           <input type="file" id="audioFileInput" />

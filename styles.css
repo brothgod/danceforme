@@ -65,13 +65,20 @@ li a:hover {
   z-index: 2;
 }
 
-#bottom-right2 {
+/* #bottom-right2 {
   z-index: 1;
   position: fixed;
   bottom: 0;
   width: 93%;
   display: flex;
   justify-content: center;
+} */
+
+#bottom-right2 {
+  position: fixed;
+  bottom: 25px;
+  right: 0px;
+  z-index: 2;
 }
 
 audio {
@@ -171,6 +178,14 @@ p {
 
 input {
   cursor: pointer;
+}
+
+/* #settingsPopup .popup-content {
+  height: 360px;
+} */
+
+#samplesPopup .popup-content {
+  height: 60px;
 }
 
 /* pop-up end */
