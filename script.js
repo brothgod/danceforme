@@ -240,10 +240,16 @@ function adjustPlayerEffects(
   // let feedback = leftFootDiff;
   // let pitch = headDiff;
 
-  if(reverbFlag.value && leftArmAngle !== -1){
-    let decay = leftArmAngle;
-    reverb.decay = parseFloat(clamp(decay, 50, 350));
-    console.log("Decay: " + decay);
+  // if(reverbFlag.value && leftArmAngle !== -1){
+  //   let decay = leftArmAngle;
+  //   reverb.decay = parseFloat(clamp(decay, 50, 350));
+  //   console.log("Decay: " + decay);
+  // }
+  
+  if(autoWahFlag.value && leftArmAngle !== -1){
+    let sensitivity = (leftArmAngle+90)/90;
+    autoWah.octaves = parseFloat(clamp(sensitivity, 0, 2));
+    console.log("Sensitivity: " + sensitivity);
   }
 
   if(feedbackDelayFlag.value && rightArmAngle !== -1){
@@ -267,11 +273,17 @@ function adjustPlayerEffects(
     console.log("PlaybackRate: " + playbackRate);
   }
 
-  if(distortionFlag.value && rightFootDiff !== -1){
-    let distort = Math.abs(rightFootDiff * 5000);
-    distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
-    console.log("Distort: " + distort);
+  // if(distortionFlag.value && rightFootDiff !== -1){
+  //   let distort = Math.abs(rightFootDiff * 5000);
+  //   distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
+  //   console.log("Distort: " + distort);
+  // }
+  if(autoFilterFlag && rightFootDiff !== -1){
+    let baseFrequency = rightFootDiff;
+    autoFilter.baseFrequency = parseFloat(clamp(baseFrequency, 0, 199));
+    console.log("Frequency: " + baseFrequency);
   }
+
   console.log("------------------");
 }
 function angleWithXAxis(x, y) {
@@ -287,13 +299,17 @@ function angleWithXAxis(x, y) {
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 let player = new Tone.Player();
 let pitchShift = new Tone.PitchShift().toDestination();
-let reverb = new Tone.Reverb().toDestination();
-let distortion = new Tone.Distortion().toDestination();
+// let reverb = new Tone.Reverb().toDestination();
+let autoWah = new Tone.AutoWah().toDestination();
+// let distortion = new Tone.Distortion().toDestination();
+let autoFilter = new Tone.AutoFilter().toDestination();
 let feedbackDelay = new Tone.FeedbackDelay().toDestination();
 var playbackRateFlag = {value: false};
 var pitchShiftFlag = {value: false};
-var reverbFlag = {value: false};
-var distortionFlag = {value: false};
+// var reverbFlag = {value: false};
+var autoWahFlag = {value: false};
+// var distortionFlag = {value: false};
+var autoFilterFlag = {value: false};
 var feedbackDelayFlag = {value: false};
 
 const audioElement = document.getElementById("audioElement");
@@ -314,15 +330,19 @@ function setUpEffects(tonePlayer) {
   var checkboxes = document.querySelectorAll('input[type="checkbox"]');
   let effectMap = {
     pitchShift: pitchShift,
-    reverb: reverb,
-    distortion: distortion,
+    // reverb: reverb,
+    autoWah: autoWah, 
+    // distortion: distortion,
+    autoFilter: autoFilter, 
     feedbackDelay: feedbackDelay,
   };
 
   let flagMap ={
     pitchShift: pitchShiftFlag,
-    reverb: reverbFlag,
-    distortion: distortionFlag,
+    // reverb: reverbFlag,
+    autoWah: autoWahFlag,
+    // distortion: distortionFlag,
+    autoFilter: autoFilterFlag,
     feedbackDelay: feedbackDelayFlag,
     playbackRate: playbackRateFlag
   }
