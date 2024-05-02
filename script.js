@@ -293,6 +293,7 @@ function handleFileUpload(event) {
   const audioElement = document.getElementById("audioElement");
   audioElement.src = fileUrl;
   player = Tone.getContext().createMediaElementSource(audioElement);
+  Tone.connect(player, Tone.getDestination());
   setUpEffects(player);
 }
 
