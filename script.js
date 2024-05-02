@@ -154,7 +154,7 @@ async function predictWebcam() {
       
       console.log("Right arm angle: " + rightArmAngle);
       console.log("Left arm angle: " + leftArmAngle);
-      adjustPlayerEffects(rightArmAngle, leftArmAngle);
+      adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff);
       
       canvasCtx.restore();
     });
@@ -213,11 +213,17 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function adjustPlayerEffects(rightArmAngle, leftArmAngle){
-  let playback_rate = (rightArmAngle + 90) / 90;
+function adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff){
+  //Formulas to get effect attributes. TODO: fiddle with these till they sound right
+  let playbackRate = (rightArmAngle + 90) / 90;
+  let reverbDecay = headDiff;
+  let distortion = rightFootDiff;
+  let feedbackDelay = leftFootDiff;
+  let feedbackFeedback = leftFootDiff; 
+  let pitch = leftArmAngle;
 
-  if (typeof player !== "undefined")
-    player.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
+  reverb.decay = reverbDecay;
+  player.playbackRate = parseFloat(Math.max(playbackRate, 0.2));
 }
 
 function angleWithXAxis(x, y) {
@@ -232,21 +238,34 @@ function angleWithXAxis(x, y) {
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 
-let player;
+let player = new Tone.Player();
+const pitchShift = new Tone.PitchShift();
+const reverb = new Tone.Reverb();
+const distortion = new Tone.Distortion(); 
+const feedbackDelay = new Tone.FeedbackDelay();
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
-  const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
-  // const fileUrl = URL.createObjectURL(file);
+  //const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
+  const fileUrl = URL.createObjectURL(file);
   Tone.start();
   player = new Tone.Player(fileUrl);
   setUpEffects(player);
 }
 
 function setUpEffects(tonePlayer){
-  const reverb = new Tone.Reverb().toDestination();
-  tonePlayer.connect(reverb);
+  var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let map = {"pitchShift":pitchShift, "reverb":reverb, "distortion":distortion, "feedbackDelay":feedbackDelay};
 
+  // Loop through each checkbox
+  checkboxes.forEach(function(checkbox) {
+    // Check if the checkbox is checked
+    if (checkbox.checked) {
+      console.log(checkbox.value + ' is checked.');
+      tonePlayer.connect(map[checkbox.value]);
+    }
+  });
+  tonePlayer.toDestination();
 }
 
 // Get references to UI elements
