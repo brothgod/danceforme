@@ -142,15 +142,16 @@ async function predictWebcam() {
           headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 0);
           lastLandmarks = result.landmarks;
           count = 0;
-          console.log("Feet difference: " + rightFootDiff);
-          console.log("Head Difference: " + headDiff);
+          // console.log("Feet difference: " + rightFootDiff);
+          // console.log("Head Difference: " + headDiff);
         } else {
           count--;
         }
       }
 
-      console.log("Right arm angle: " + rightArmAngle);
-      console.log("Left arm angle: " + leftArmAngle);
+      // console.log("Right arm angle: " + rightArmAngle);
+      // console.log("Left arm angle: " + leftArmAngle);
+      if (count % interval == 0) {
       adjustPlayerEffects(
         rightArmAngle,
         leftArmAngle,
@@ -158,6 +159,7 @@ async function predictWebcam() {
         leftFootDiff,
         headDiff
       );
+      }
 
       canvasCtx.restore();
     });
@@ -238,33 +240,39 @@ function adjustPlayerEffects(
   // let feedback = leftFootDiff;
   // let pitch = headDiff;
 
-  let decay = leftArmAngle;
-  let feedback = (rightArmAngle + 90) / 180;
-  let delay = (rightArmAngle + 90) / 180;
-  let pitch = Math.abs(leftFootDiff * 60);
-  let playbackRate = Math.abs(headDiff * 10) + 0.3;
-  let distort = Math.abs(rightFootDiff * 5000);
+  if(reverbFlag.value){
+    let decay = leftArmAngle;
+    reverb.decay = parseFloat(clamp(decay, 50, 350));
+    console.log("Decay: " + decay);
+  }
 
-  console.log("Decay: " + decay);
-  console.log("Feedback: " + feedback);
-  console.log("Delay: " + delay);
+  if(feedbackDelayFlag.value){
+    let feedback = (rightArmAngle + 90) / 180;
+    let delay = (rightArmAngle + 90) / 180;
+    feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
+    feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
+    console.log("Feedback: " + feedback);
+    console.log("Delay: " + delay);
+  }
 
-  reverb.decay = parseFloat(clamp(decay, 50, 350));
-  feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
-  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
-
-  if (leftFootDiff !== null) {
-    distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
+  if(pitchShiftFlag.value){
+    let pitch = Math.abs(leftFootDiff * 60);
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
-    if (playbackRateFlag) {
-      audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
-    }
-    console.log("PlaybackRate: " + playbackRate);
     console.log("Pitch: " + pitch);
+  }
+
+  if(playbackRateFlag.value){
+    let playbackRate = Math.abs(headDiff * 10) + 0.3;
+    audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
+    console.log("PlaybackRate: " + playbackRate);
+  }
+
+  if(distortionFlag.value){
+    let distort = Math.abs(rightFootDiff * 5000);
+    distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
     console.log("Distort: " + distort);
   }
   console.log("------------------");
-  console.log("lfd:" + leftFootDiff);
 }
 function angleWithXAxis(x, y) {
   // Calculate the angle in radians using Math.atan2
@@ -282,7 +290,12 @@ let pitchShift = new Tone.PitchShift().toDestination();
 let reverb = new Tone.Reverb().toDestination();
 let distortion = new Tone.Distortion().toDestination();
 let feedbackDelay = new Tone.FeedbackDelay().toDestination();
-let playbackRateFlag = false;
+var playbackRateFlag = {value: false};
+var pitchShiftFlag = {value: false};
+var reverbFlag = {value: false};
+var distortionFlag = {value: false};
+var feedbackDelayFlag = {value: false};
+
 const audioElement = document.getElementById("audioElement");
 
 function handleFileUpload(event) {
@@ -299,22 +312,36 @@ function handleFileUpload(event) {
 
 function setUpEffects(tonePlayer) {
   var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  let map = {
+  let effectMap = {
     pitchShift: pitchShift,
     reverb: reverb,
     distortion: distortion,
     feedbackDelay: feedbackDelay,
   };
 
+  let flagMap ={
+    pitchShift: pitchShiftFlag,
+    reverb: reverbFlag,
+    distortion: distortionFlag,
+    feedbackDelay: feedbackDelayFlag,
+    playbackRate: playbackRateFlag
+  }
+
   // Loop through each checkbox
-  playbackRateFlag = false;
+  Object.keys(flagMap).forEach(function (key) {
+    flagMap[key].value = false;
+  });
+
   checkboxes.forEach(function (checkbox) {
     // Check if the checkbox is checked
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
-      if (checkbox.value === "playbackRate") {
-        playbackRateFlag = true;
-      } else Tone.connect(tonePlayer, map[checkbox.value]);
+      if (checkbox.value !== "playbackRate") {
+        Tone.connect(tonePlayer, effectMap[checkbox.value]);
+      }
+      flagMap[checkbox.value].value = true;
+      console.log(playbackRateFlag);
+      console.log(flagMap);
     }
   });
 }
