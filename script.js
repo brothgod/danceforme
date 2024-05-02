@@ -245,16 +245,23 @@ function adjustPlayerEffects(
   let playbackRate = headDiff;
   let distort = rightFootDiff;
 
-  console.log("old feedback: " + feedbackDelay.feedback.value + ". new feedback: " + feedback);
+  console.log("Decay: "+decay);
+  console.log("Feedback: "+feedback);
+  console.log("Delay: "+delay);
+  console.log("Pitch: "+pitch);
+  console.log("PlaybackRate: "+playbackRate);
+  console.log("Distort: "+distort);
+  console.log("------------------");
+
   reverb.decay = parseFloat(clamp(decay, 0.2, 1.8));
-  feedbackDelay.delay = parseFloat(clamp(delay, 0.2, 1.8));
-  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0.2, 1.8));
+  feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.2, 1.8)); //seconds, any value
+  feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 1)); //between [0,1]
 
   if(pitch !== null)
-    distortion.distortion = parseFloat(clamp(distort, 0.2, 1.8));
-    pitchShift.pitch = parseFloat(clamp(pitch, 0.2, 1.8));
+    distortion.distortion = parseFloat(clamp(distort, 0, 1000)); //between [0,1]
+    pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     if (playbackRateFlag)
-      player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8));
+      player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8)); // [.2, 1.8]
 }
 
 function angleWithXAxis(x, y) {
@@ -270,10 +277,10 @@ function angleWithXAxis(x, y) {
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 
 let player = new Tone.Player();
-const pitchShift = new Tone.PitchShift();
-const reverb = new Tone.Reverb();
-const distortion = new Tone.Distortion();
-const feedbackDelay = new Tone.FeedbackDelay();
+let pitchShift = new Tone.PitchShift().toDestination();
+let reverb = new Tone.Reverb().toDestination();
+let distortion = new Tone.Distortion().toDestination();
+let feedbackDelay = new Tone.FeedbackDelay().toDestination();
 let playbackRateFlag = false;
 
 function handleFileUpload(event) {
@@ -281,7 +288,7 @@ function handleFileUpload(event) {
   //const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
   const fileUrl = URL.createObjectURL(file);
   Tone.start();
-  player = new Tone.Player(fileUrl);
+  player = new Tone.Player(fileUrl).toDestination();
   setUpEffects(player);
 }
 
@@ -295,8 +302,8 @@ function setUpEffects(tonePlayer) {
   };
 
   // Loop through each checkbox
+  playbackRateFlag = false;
   checkboxes.forEach(function (checkbox) {
-    playbackRateFlag = false;
     // Check if the checkbox is checked
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
@@ -305,7 +312,6 @@ function setUpEffects(tonePlayer) {
       } else tonePlayer.connect(map[checkbox.value]);
     }
   });
-  tonePlayer.toDestination();
 }
 
 // Get references to UI elements
