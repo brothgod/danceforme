@@ -20,8 +20,6 @@ import {
   DrawingUtils,
 } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 
-const demosSection = document.getElementById("demos");
-
 let poseLandmarker = undefined;
 let runningMode = "IMAGE";
 let enableWebcamButton;
@@ -44,7 +42,6 @@ const createPoseLandmarker = async (numPeople) => {
     runningMode: runningMode,
     numPoses: numPeople,
   });
-  demosSection.classList.remove("invisible");
 };
 const numPeople = document.getElementById("numPeople");
 numPeople.addEventListener("change", function () {
@@ -103,6 +100,7 @@ function enableCam(event) {
 
 let lastLandmarks = null;
 let count = 0;
+let interval = 10;
 let lastVideoTime = -1;
 async function predictWebcam() {
   canvasElement.style.height = videoHeight;
@@ -124,22 +122,35 @@ async function predictWebcam() {
 
       let rightArmAngle = 0;
       let leftArmAngle = 0;
-      let legDifference = 0;
       let hipAngle = 0;
       for (const landmark of result.landmarks) {
         // drawingUtils.drawLandmarks(landmark, {
         //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
         // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        rightArmAngle +=
-          calculateRightArmAngle(landmark) / result.landmarks.length;
-        leftArmAngle +=
-          calculateLeftArmAngle(landmark) / result.landmarks.length;
+        rightArmAngle += calcRightArmAngle(landmark) / result.landmarks.length
+        leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
       }
-      console.log("right arm" + rightArmAngle);
-      console.log("left arm" + leftArmAngle);
-      adjustPlayerEffects(rightArmAngle, leftArmAngle);
 
+      if(count%interval==0){
+        if(result.landmarks.length==numPeople.value){
+          let rightFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 28);
+          let leftFootDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 27);
+          let headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks , 0);
+          lastLandmarks = result.landmarks;
+          count = 0;
+          console.log("Feet difference: " + rightFootDiff);
+          console.log("Head Difference: " + headDiff);
+        }
+        else{
+          count--;
+        }
+      }
+      
+      console.log("Right arm angle: " + rightArmAngle);
+      console.log("Left arm angle: " + leftArmAngle);
+      adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff);
+      
       canvasCtx.restore();
     });
   }
@@ -150,8 +161,7 @@ async function predictWebcam() {
   }
 }
 
-function calculateRightArmAngle(landmark) {
-  //Returns angle between -90 and 90
+function calcRightArmAngle(landmark){ //Returns angle between -90 and 90
   let rightShoulder = landmark[12];
   let rightElbow = landmark[14];
 
@@ -165,8 +175,7 @@ function calculateRightArmAngle(landmark) {
   return clamp(positiveAngle - 180, -90, 90);
 }
 
-function calculateLeftArmAngle(landmark) {
-  //Returns angle between -90 and 90
+function calcLeftArmAngle(landmark){  //Returns angle between -90 and 90
   let leftShoulder = landmark[11];
   let leftElbow = landmark[13];
 
@@ -178,20 +187,38 @@ function calculateLeftArmAngle(landmark) {
   return clamp(-1 * angle, -90, 90);
 }
 
-function calculateFeetDifference(landmarks, pastLandmarks) {
-  //Returns the feet movement difference
-  let rightFoot;
+function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum){//Returns x-difference of pose number
+  if(pastLandmarks==null){
+    return 0;
+  }
+  let landmarkX = landmarks.map(landmark => {return landmark[landmarkNum].x});
+  let pastLandmarkX = pastLandmarks.map(landmark => {return landmark[landmarkNum].x});
+  landmarkX.sort();
+  pastLandmarkX.sort();
+
+  let differences = 0;
+  for(let i = 0; i < numPeople.value; i+=1){
+    differences+=landmarkX[i]-pastLandmarkX[i];
+  }
+
+  return differences / numPeople.value;
 }
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function adjustPlayerEffects(rightArmAngle, leftArmAngle) {
-  let playback_rate = (rightArmAngle + 90) / 90;
+function adjustPlayerEffects(rightArmAngle, leftArmAngle, rightFootDiff, leftFootDiff, headDiff){
+  //Formulas to get effect attributes. TODO: fiddle with these till they sound right
+  let playbackRate = (rightArmAngle + 90) / 90;
+  let reverbDecay = headDiff;
+  let distortion = rightFootDiff;
+  let feedbackDelay = leftFootDiff;
+  let feedbackFeedback = leftFootDiff; 
+  let pitch = leftArmAngle;
 
-  if (typeof player !== "undefined")
-    player.playbackRate = parseFloat(Math.max(playback_rate, 0.2));
+  reverb.decay = reverbDecay;
+  player.playbackRate = parseFloat(Math.max(playbackRate, 0.2));
 }
 
 function angleWithXAxis(x, y) {
@@ -206,13 +233,34 @@ function angleWithXAxis(x, y) {
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 
-let player;
+let player = new Tone.Player();
+const pitchShift = new Tone.PitchShift();
+const reverb = new Tone.Reverb();
+const distortion = new Tone.Distortion(); 
+const feedbackDelay = new Tone.FeedbackDelay();
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
+  //const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
   const fileUrl = URL.createObjectURL(file);
   Tone.start();
-  player = new Tone.Player(fileUrl).toDestination();
+  player = new Tone.Player(fileUrl);
+  setUpEffects(player);
+}
+
+function setUpEffects(tonePlayer){
+  var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let map = {"pitchShift":pitchShift, "reverb":reverb, "distortion":distortion, "feedbackDelay":feedbackDelay};
+
+  // Loop through each checkbox
+  checkboxes.forEach(function(checkbox) {
+    // Check if the checkbox is checked
+    if (checkbox.checked) {
+      console.log(checkbox.value + ' is checked.');
+      tonePlayer.connect(map[checkbox.value]);
+    }
+  });
+  tonePlayer.toDestination();
 }
 
 // Get references to UI elements
