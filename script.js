@@ -241,29 +241,31 @@ function adjustPlayerEffects(
   let decay = leftArmAngle;
   let feedback = (rightArmAngle + 90) / 180;
   let delay = (rightArmAngle + 90) / 180;
-  let pitch = leftFootDiff;
-  let playbackRate = headDiff;
-  let distort = rightFootDiff;
+  let pitch = Math.abs(leftFootDiff * 60);
+  let playbackRate = Math.abs(headDiff * 10) + 0.3;
+  let distort = Math.abs(rightFootDiff * 5000);
 
   console.log("Decay: " + decay);
   console.log("Feedback: " + feedback);
   console.log("Delay: " + delay);
-  console.log("Pitch: " + pitch);
-  console.log("PlaybackRate: " + playbackRate);
-  console.log("Distort: " + distort);
-  console.log("------------------");
 
-  reverb.decay = parseFloat(clamp(decay, 0.2, 1.8));
+  reverb.decay = parseFloat(clamp(decay, 50, 350));
   feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
   feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
 
-  if (pitch !== null)
+  if (leftFootDiff !== null) {
     distortion.distortion = parseFloat(clamp(distort, 0, 1000)); //between [0,1]
-  pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
-  if (playbackRateFlag)
-    player.playbackRate = parseFloat(clamp(playbackRate, 0.2, 1.8)); // [.2, 1.8]
+    pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
+    if (playbackRateFlag) {
+      player.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
+    }
+    console.log("PlaybackRate: " + playbackRate);
+    console.log("Pitch: " + pitch);
+    console.log("Distort: " + distort);
+  }
+  console.log("------------------");
+  console.log("lfd:" + leftFootDiff);
 }
-
 function angleWithXAxis(x, y) {
   // Calculate the angle in radians using Math.atan2
   const angleRadians = Math.atan2(y, x);
