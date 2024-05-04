@@ -66,21 +66,21 @@ li a:hover {
   z-index: 2;
 }
 
-/* #bottom-right2 {
+#bottom-right2 {
   z-index: 1;
   position: fixed;
   bottom: 0;
-  width: 93%;
+  width: 100%;
   display: flex;
   justify-content: center;
-} */
+}
 
-#bottom-right2 {
+/* #bottom-right2 {
   position: fixed;
   bottom: 25px;
   right: 0px;
   z-index: 2;
-}
+} */
 
 audio {
   width: 40vw;
@@ -198,9 +198,9 @@ input {
 video {
   clear: both;
   display: block;
-  transform: rotateY(180deg);
+  /* transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
-  -moz-transform: rotateY(180deg);
+  -moz-transform: rotateY(180deg); */
 }
 
 .invisible {

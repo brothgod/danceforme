@@ -151,15 +151,15 @@ async function predictWebcam() {
 
       // console.log("Right arm angle: " + rightArmAngle);
       // console.log("Left arm angle: " + leftArmAngle);
-      //if (count % interval == 0) {
-      adjustPlayerEffects(
-        rightArmAngle,
-        leftArmAngle,
-        rightFootDiff,
-        leftFootDiff,
-        headDiff
-      );
-      //}
+      if (count % interval == 0) {
+        adjustPlayerEffects(
+          rightArmAngle,
+          leftArmAngle,
+          rightFootDiff,
+          leftFootDiff,
+          headDiff
+        );
+      }
 
       canvasCtx.restore();
     });
@@ -245,14 +245,14 @@ function adjustPlayerEffects(
   //   reverb.decay = parseFloat(clamp(decay, 50, 350));
   //   console.log("Decay: " + decay);
   // }
-  
-  if(autoWahFlag.value && leftArmAngle !== -1){
-    let sensitivity = (leftArmAngle+90)/90;
-    autoWah.octaves = parseFloat(clamp(sensitivity, 0, 2));
-    console.log("Sensitivity: " + sensitivity);
+
+  if (autoWahFlag.value && leftArmAngle !== -1) {
+    let octaves = (leftArmAngle + 90) / 90;
+    autoWah.octaves = parseFloat(clamp(octaves, 0, 2));
+    console.log("Octaves: " + octaves);
   }
 
-  if(feedbackDelayFlag.value && rightArmAngle !== -1){
+  if (feedbackDelayFlag.value && rightArmAngle !== -1) {
     let feedback = (rightArmAngle + 90) / 180;
     let delay = (rightArmAngle + 90) / 180;
     feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
@@ -261,13 +261,13 @@ function adjustPlayerEffects(
     console.log("Delay: " + delay);
   }
 
-  if(pitchShiftFlag.value && leftFootDiff !== -1){
+  if (pitchShiftFlag.value && leftFootDiff !== -1) {
     let pitch = Math.abs(leftFootDiff * 60);
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     console.log("Pitch: " + pitch);
   }
 
-  if(playbackRateFlag.value && headDiff !== -1){
+  if (playbackRateFlag.value && headDiff !== -1) {
     let playbackRate = Math.abs(headDiff * 10) + 0.3;
     audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
     console.log("PlaybackRate: " + playbackRate);
@@ -278,9 +278,9 @@ function adjustPlayerEffects(
   //   distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
   //   console.log("Distort: " + distort);
   // }
-  if(autoFilterFlag && rightFootDiff !== -1){
-    let baseFrequency = rightFootDiff;
-    autoFilter.baseFrequency = parseFloat(clamp(baseFrequency, 0, 199));
+  if (autoFilterFlag && rightFootDiff !== -1) {
+    let baseFrequency = rightFootDiff * 10;
+    // autoFilter.depth = parseFloat(clamp(baseFrequency, 0, 1));
     console.log("Frequency: " + baseFrequency);
   }
 
@@ -297,22 +297,25 @@ function angleWithXAxis(x, y) {
 }
 
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
-let player = new Tone.Player();
+const audioElement = document.getElementById("audioElement");
+let player = Tone.getContext().createMediaElementSource(audioElement);
+Tone.connect(player, Tone.getDestination());
 let pitchShift = new Tone.PitchShift().toDestination();
 // let reverb = new Tone.Reverb().toDestination();
 let autoWah = new Tone.AutoWah().toDestination();
 // let distortion = new Tone.Distortion().toDestination();
-let autoFilter = new Tone.AutoFilter().toDestination();
+let autoFilter = new Tone.Vibrato({
+  frequency: 500,
+  depth: 1,
+}).toDestination();
 let feedbackDelay = new Tone.FeedbackDelay().toDestination();
-var playbackRateFlag = {value: false};
-var pitchShiftFlag = {value: false};
+var playbackRateFlag = { value: false };
+var pitchShiftFlag = { value: false };
 // var reverbFlag = {value: false};
-var autoWahFlag = {value: false};
+var autoWahFlag = { value: false };
 // var distortionFlag = {value: false};
-var autoFilterFlag = {value: false};
-var feedbackDelayFlag = {value: false};
-
-const audioElement = document.getElementById("audioElement");
+var autoFilterFlag = { value: false };
+var feedbackDelayFlag = { value: false };
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -321,8 +324,6 @@ function handleFileUpload(event) {
   Tone.start();
 
   audioElement.src = fileUrl;
-  player = Tone.getContext().createMediaElementSource(audioElement);
-  Tone.connect(player, Tone.getDestination());
   setUpEffects(player);
 }
 
@@ -331,21 +332,21 @@ function setUpEffects(tonePlayer) {
   let effectMap = {
     pitchShift: pitchShift,
     // reverb: reverb,
-    autoWah: autoWah, 
+    autoWah: autoWah,
     // distortion: distortion,
-    autoFilter: autoFilter, 
+    autoFilter: autoFilter,
     feedbackDelay: feedbackDelay,
   };
 
-  let flagMap ={
+  let flagMap = {
     pitchShift: pitchShiftFlag,
     // reverb: reverbFlag,
     autoWah: autoWahFlag,
     // distortion: distortionFlag,
     autoFilter: autoFilterFlag,
     feedbackDelay: feedbackDelayFlag,
-    playbackRate: playbackRateFlag
-  }
+    playbackRate: playbackRateFlag,
+  };
 
   // Loop through each checkbox
   Object.keys(flagMap).forEach(function (key) {
