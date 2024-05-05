@@ -232,27 +232,12 @@ function adjustPlayerEffects(
   leftFootDiff,
   headDiff
 ) {
-  //Formulas to get effect attributes. TODO: fiddle with these till they sound right
-  // let playbackRate = (rightArmAngle + 90) / 90;
-  // let decay = leftArmAngle;
-  // let distort = rightFootDiff;
-  // let delay = leftFootDiff;
-  // let feedback = leftFootDiff;
-  // let pitch = headDiff;
-
-  // if(reverbFlag.value && leftArmAngle !== -1){
-  //   let decay = leftArmAngle;
-  //   reverb.decay = parseFloat(clamp(decay, 50, 350));
-  //   console.log("Decay: " + decay);
-  // }
-
-  if (autoWahFlag.value && leftArmAngle !== -1) {
+  if (vibrato.flag && leftArmAngle !== -1) {
     let octaves = (leftArmAngle + 90) / 90;
-    autoWah.octaves = parseFloat(clamp(octaves, 0, 2));
-    console.log("Octaves: " + octaves);
+    //TODO: add formula
   }
 
-  if (feedbackDelayFlag.value && rightArmAngle !== -1) {
+  if (feedbackDelay.flag && rightArmAngle !== -1) {
     let feedback = (rightArmAngle + 90) / 180;
     let delay = (rightArmAngle + 90) / 180;
     feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
@@ -261,24 +246,20 @@ function adjustPlayerEffects(
     console.log("Delay: " + delay);
   }
 
-  if (pitchShiftFlag.value && leftFootDiff !== -1) {
+  if (pitchShift.flag && leftFootDiff !== -1) {
     let pitch = Math.abs(leftFootDiff * 60);
     pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     console.log("Pitch: " + pitch);
   }
 
-  if (playbackRateFlag.value && headDiff !== -1) {
+  if (playbackRate.flag && headDiff !== -1) {
     let playbackRate = Math.abs(headDiff * 10) + 0.3;
     audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
     console.log("PlaybackRate: " + playbackRate);
   }
 
-  // if(distortionFlag.value && rightFootDiff !== -1){
-  //   let distort = Math.abs(rightFootDiff * 5000);
-  //   distortion.distortion = parseFloat(clamp(distort, 0, 500)); //between [0,1]
-  //   console.log("Distort: " + distort);
-  // }
-  if (autoFilterFlag && rightFootDiff !== -1) {
+  if (phaser.flag && rightFootDiff !== -1) {
+    //TODOL add phaser formula
     let baseFrequency = rightFootDiff * 10;
     // autoFilter.depth = parseFloat(clamp(baseFrequency, 0, 1));
     console.log("Frequency: " + baseFrequency);
@@ -299,23 +280,61 @@ function angleWithXAxis(x, y) {
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 const audioElement = document.getElementById("audioElement");
 let player = Tone.getContext().createMediaElementSource(audioElement);
-Tone.connect(player, Tone.getDestination());
-let pitchShift = new Tone.PitchShift().toDestination();
-// let reverb = new Tone.Reverb().toDestination();
-let autoWah = new Tone.AutoWah().toDestination();
-// let distortion = new Tone.Distortion().toDestination();
-let autoFilter = new Tone.Vibrato({
-  frequency: 500,
-  depth: 1,
-}).toDestination();
-let feedbackDelay = new Tone.FeedbackDelay().toDestination();
-var playbackRateFlag = { value: false };
-var pitchShiftFlag = { value: false };
-// var reverbFlag = {value: false};
-var autoWahFlag = { value: false };
-// var distortionFlag = {value: false};
-var autoFilterFlag = { value: false };
-var feedbackDelayFlag = { value: false };
+audioElement.autoplay = true;
+audioElement.src = "song-files/Sean Paul, J Balvin - Contra La Pared.wav";
+let pitchShift = {
+  name: "pitch shift",
+  effect: new Tone.PitchShift(),
+  flag: false,
+};
+let vibrato = {
+  name: "vibrato",
+  effect: new Tone.Vibrato({
+    frequency: 10,
+  }),
+  flag: false,
+};
+let phaser = {
+  name: "phaser",
+  effect: new Tone.Phaser({
+    frequency: 10,
+    baseFrequency: 1000,
+  }),
+  flag: false,
+};
+let feedbackDelay = {
+  name: "feedback delay",
+  effect: new Tone.FeedbackDelay(),
+  flag: false,
+};
+
+let playbackRate = { name: "playback rate", effect: null, flag: false };
+let effectMap = [pitchShift, phaser, feedbackDelay, vibrato, playbackRate];
+
+function addCheckboxes(effectMap) {
+  const container = document.getElementById("checkboxes");
+  effectMap.forEach((effect) => {
+    let str = effect.name;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = str;
+    checkbox.name = str.replace(/\s+/g, "-").toLowerCase(); // Convert spaces to hyphens and make lowercase for name attribute
+    checkbox.id = str.replace(/\s+/g, "-").toLowerCase() + "-checkbox"; // Unique ID for the checkbox
+    checkbox.checked = true; // Initially unchecked
+    effect.id = checkbox.id;
+
+    const label = document.createElement("label");
+    label.htmlFor = checkbox.id;
+    label.textContent = str;
+
+    const lineBreak = document.createElement("br");
+
+    container.appendChild(checkbox);
+    container.appendChild(label);
+    container.appendChild(lineBreak);
+  });
+}
+addCheckboxes(effectMap);
 
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -328,59 +347,23 @@ function handleFileUpload(event) {
 }
 
 function setUpEffects(tonePlayer) {
-  var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  let effectMap = {
-    pitchShift: pitchShift,
-    // reverb: reverb,
-    autoWah: autoWah,
-    // distortion: distortion,
-    autoFilter: autoFilter,
-    feedbackDelay: feedbackDelay,
-  };
-
-  let flagMap = {
-    pitchShift: pitchShiftFlag,
-    // reverb: reverbFlag,
-    autoWah: autoWahFlag,
-    // distortion: distortionFlag,
-    autoFilter: autoFilterFlag,
-    feedbackDelay: feedbackDelayFlag,
-    playbackRate: playbackRateFlag,
-  };
-
-  // Loop through each checkbox
-  Object.keys(flagMap).forEach(function (key) {
-    flagMap[key].value = false;
-  });
-
-  checkboxes.forEach(function (checkbox) {
-    // Check if the checkbox is checked
+  let lastEffect = tonePlayer;
+  effectMap.forEach(function (effect) {
+    let checkbox = document.getElementById(effect.id);
     if (checkbox.checked) {
       console.log(checkbox.value + " is checked.");
-      if (checkbox.value !== "playbackRate") {
-        Tone.connect(tonePlayer, effectMap[checkbox.value]);
+      if (effect.name !== "playback rate") {
+        Tone.connect(lastEffect, effect.effect);
+        lastEffect = effect.effect;
       }
-      flagMap[checkbox.value].value = true;
-      console.log(playbackRateFlag);
-      console.log(flagMap);
+      effect.flag = true;
+      console.log(effectMap);
     }
   });
+  Tone.connect(lastEffect, Tone.getDestination());
 }
+setUpEffects(player);
 
 // Get references to UI elements
-const playButton = document.getElementById("playButton");
-const stopButton = document.getElementById("stopButton");
 const audioFileInput = document.getElementById("audioFileInput");
-
-// // Add event listeners to UI elements
-// playButton.addEventListener("click", () => {
-//   // Start playback
-//   player.start();
-// });
-
-// stopButton.addEventListener("click", () => {
-//   // Stop playback
-//   player.stop();
-// });
-
 audioFileInput.addEventListener("change", handleFileUpload);
