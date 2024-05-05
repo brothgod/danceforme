@@ -1,17 +1,3 @@
-// Copyright 2023 The MediaPipe Authors.
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // ----------------------------------- WEBCAM PROCESSING -----------------------------------------
 
 import {
@@ -24,7 +10,7 @@ let poseLandmarker = undefined;
 let runningMode = "IMAGE";
 let enableWebcamButton;
 let webcamRunning = false;
-const videoHeight = "100%";
+const videoHeight = "95%";
 const videoWidth = "100%";
 
 // Before we can use PoseLandmarker class we must wait for it to finish
@@ -46,13 +32,9 @@ const createPoseLandmarker = async (numPeople) => {
 const numPeople = document.getElementById("numPeople");
 numPeople.addEventListener("change", function () {
   createPoseLandmarker(this.value);
+  lastLandmarks = null;
 });
-
 createPoseLandmarker(numPeople.value);
-
-/********************************************************************
-  // Demo 2: Continuously grab image from webcam stream and detect it.
-  ********************************************************************/
 
 const video = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
@@ -123,9 +105,6 @@ async function predictWebcam() {
       let rightArmAngle = -1;
       let leftArmAngle = -1;
       for (const landmark of result.landmarks) {
-        // drawingUtils.drawLandmarks(landmark, {
-        //   radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
-        // });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
         rightArmAngle += calcRightArmAngle(landmark) / result.landmarks.length;
         leftArmAngle += calcLeftArmAngle(landmark) / result.landmarks.length;
@@ -149,8 +128,8 @@ async function predictWebcam() {
         }
       }
 
-      // console.log("Right arm angle: " + rightArmAngle);
-      // console.log("Left arm angle: " + leftArmAngle);
+      console.debug("Right arm angle: " + rightArmAngle);
+      console.debug("Left arm angle: " + leftArmAngle);
       if (count % interval == 0) {
         adjustPlayerEffects(
           rightArmAngle,
@@ -212,12 +191,14 @@ function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum) {
   });
   landmarkX.sort();
   pastLandmarkX.sort();
-
+  // console.debug(landmarkX);
+  // console.debug(pastLandmarkX);
   let differences = 0;
   for (let i = 0; i < numPeople.value; i += 1) {
     differences += landmarkX[i] - pastLandmarkX[i];
   }
-
+  // console.debug(differences);
+  // console.debug(numPeople);
   return differences / numPeople.value;
 }
 
@@ -233,37 +214,37 @@ function adjustPlayerEffects(
   headDiff
 ) {
   if (distortion.flag && leftArmAngle !== -1) {
-    let distort = Math.abs(leftArmAngle) / 90;
-    distortion.effect.distortion = clamp(distort, 0, 0.4);
-    console.log("Distortion: " + distortion);
+    let distort = Math.abs(leftArmAngle) / 180;
+    console.log("Distortion: " + distort);
+    distortion.effect.distortion = clamp(distort, 0, 0.5);
   }
 
   if (feedbackDelay.flag && rightArmAngle !== -1) {
-    let feedback = (rightArmAngle + 90) / 180;
-    let delay = (rightArmAngle + 90) / 180;
-    feedbackDelay.effect.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
-    feedbackDelay.effect.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
+    let feedback = Math.abs(rightArmAngle) / 180;
+    let delay = Math.abs(rightArmAngle) / 90;
     console.log("Feedback: " + feedback);
     console.log("Delay: " + delay);
+    feedbackDelay.effect.delayTime.value = parseFloat(clamp(delay, 0, 1)); //seconds, any value
+    feedbackDelay.effect.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
   }
 
   if (pitchShift.flag && leftFootDiff !== -1) {
     let pitch = Math.abs(leftFootDiff * 60);
-    pitchShift.effect.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     console.log("Pitch: " + pitch);
+    pitchShift.effect.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
   }
 
   if (playbackRate.flag && headDiff !== -1) {
     let playbackRate = Math.abs(headDiff * 10) + 0.3;
-    audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
     console.log("PlaybackRate: " + playbackRate);
+    audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
   }
 
   if (phaser.flag && rightFootDiff !== -1) {
     //TODOL add phaser formula
-    let octaves = rightFootDiff * 100;
-    phaser.effect.octaves = parseFloat(clamp(octaves, 0, 8));
+    let octaves = Math.abs(rightFootDiff) * 100;
     console.log("Octaves: " + octaves);
+    phaser.effect.octaves = parseFloat(clamp(octaves, 0, 8));
   }
 
   console.log("------------------");
@@ -290,7 +271,10 @@ let pitchShift = {
 };
 let phaser = {
   name: "phaser",
-  effect: new Tone.Phaser(),
+  effect: new Tone.Phaser({
+    frequency: 10,
+    baseFrequency: 100,
+  }),
   flag: false,
 };
 let feedbackDelay = {
@@ -359,6 +343,7 @@ function setUpEffects(tonePlayer) {
   });
   Tone.connect(lastEffect, Tone.getDestination());
 }
+// setUpEffects(player);
 
 function changeEffects() {
   Tone.disconnect(player);
@@ -369,16 +354,20 @@ function changeEffects() {
   setUpEffects(player);
   audioElement.playbackRate = 1;
 }
-// setUpEffects(player);
 
-// Add event listener to the "Apply Changes" link
-document
-  .getElementById("applyChanges")
-  .addEventListener("click", function (event) {
-    // Prevent the default anchor click behavior
-    event.preventDefault();
+document.getElementById("openSettings").addEventListener("click", function () {
+  settingsPopup.classList.add("show");
+});
+document.getElementById("closeSettings").addEventListener("click", function () {
+  settingsPopup.classList.remove("show");
+  changeEffects();
+});
+window.addEventListener("click", function (event) {
+  if (event.target == settingsPopup) {
+    settingsPopup.classList.remove("show");
     changeEffects();
-  });
+  }
+});
 
 // Get references to UI elements
 const audioFileInput = document.getElementById("audioFileInput");
