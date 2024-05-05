@@ -90,7 +90,7 @@ function enableCam(event) {
   const constraints = {
     video: true,
   };
-
+  console.debug("working!!!!");
   // Activate the webcam stream.
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     video.srcObject = stream;
@@ -232,10 +232,10 @@ function adjustPlayerEffects(
   leftFootDiff,
   headDiff
 ) {
-  if (vibrato.flag && leftArmAngle !== -1) {
-    let depth = Math.abs(leftArmAngle) / 90;
-    vibrato.effect.depth = clamp(octaves, 0, 0.5);
-    console.log("Depth: " + depth);
+  if (distortion.flag && leftArmAngle !== -1) {
+    let distort = Math.abs(leftArmAngle) / 90;
+    distortion.effect.distortion = clamp(distort, 0, 0.4);
+    console.log("Distortion: " + distortion);
   }
 
   if (feedbackDelay.flag && rightArmAngle !== -1) {
@@ -281,16 +281,11 @@ function angleWithXAxis(x, y) {
 // // ----------------------------------- AUDIO PLAYER -----------------------------------------
 const audioElement = document.getElementById("audioElement");
 let player = Tone.getContext().createMediaElementSource(audioElement);
-audioElement.autoplay = true;
-audioElement.src = "song-files/Sean Paul, J Balvin - Contra La Pared.wav";
+// audioElement.autoplay = true;
+// audioElement.src = "song-files/Sean Paul, J Balvin - Contra La Pared.wav";
 let pitchShift = {
   name: "pitch shift",
   effect: new Tone.PitchShift(),
-  flag: false,
-};
-let vibrato = {
-  name: "vibrato",
-  effect: new Tone.Vibrato(),
   flag: false,
 };
 let phaser = {
@@ -303,9 +298,14 @@ let feedbackDelay = {
   effect: new Tone.FeedbackDelay(),
   flag: false,
 };
+let distortion = {
+  name: "distortion",
+  effect: new Tone.Distortion(),
+  flag: false,
+};
 
 let playbackRate = { name: "playback rate", effect: null, flag: false };
-let effectMap = [pitchShift, phaser, feedbackDelay, vibrato, playbackRate];
+let effectMap = [pitchShift, phaser, feedbackDelay, distortion, playbackRate];
 
 function addCheckboxes(effectMap) {
   const container = document.getElementById("checkboxes");
@@ -316,7 +316,7 @@ function addCheckboxes(effectMap) {
     checkbox.value = str;
     checkbox.name = str.replace(/\s+/g, "-").toLowerCase(); // Convert spaces to hyphens and make lowercase for name attribute
     checkbox.id = str.replace(/\s+/g, "-").toLowerCase() + "-checkbox"; // Unique ID for the checkbox
-    checkbox.checked = true; // Initially unchecked
+    checkbox.checked = false; //true; // Initially unchecked
     effect.id = checkbox.id;
 
     const label = document.createElement("label");
@@ -345,20 +345,40 @@ function handleFileUpload(event) {
 function setUpEffects(tonePlayer) {
   let lastEffect = tonePlayer;
   effectMap.forEach(function (effect) {
+    effect.flag = false;
     let checkbox = document.getElementById(effect.id);
     if (checkbox.checked) {
-      console.log(checkbox.value + " is checked.");
+      console.info(checkbox.value + " is checked.");
       if (effect.name !== "playback rate") {
         Tone.connect(lastEffect, effect.effect);
         lastEffect = effect.effect;
       }
       effect.flag = true;
-      console.log(effectMap);
+      console.info(effectMap);
     }
   });
   Tone.connect(lastEffect, Tone.getDestination());
 }
-setUpEffects(player);
+
+function changeEffects() {
+  Tone.disconnect(player);
+  effectMap.forEach(function (effect) {
+    if (effect.name !== "playback rate") Tone.disconnect(effect.effect);
+  });
+
+  setUpEffects(player);
+  audioElement.playbackRate = 1;
+}
+// setUpEffects(player);
+
+// Add event listener to the "Apply Changes" link
+document
+  .getElementById("applyChanges")
+  .addEventListener("click", function (event) {
+    // Prevent the default anchor click behavior
+    event.preventDefault();
+    changeEffects();
+  });
 
 // Get references to UI elements
 const audioFileInput = document.getElementById("audioFileInput");
