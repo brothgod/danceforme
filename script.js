@@ -233,22 +233,23 @@ function adjustPlayerEffects(
   headDiff
 ) {
   if (vibrato.flag && leftArmAngle !== -1) {
-    let octaves = (leftArmAngle + 90) / 90;
-    //TODO: add formula
+    let depth = Math.abs(leftArmAngle) / 90;
+    vibrato.effect.depth = clamp(octaves, 0, 0.5);
+    console.log("Depth: " + depth);
   }
 
   if (feedbackDelay.flag && rightArmAngle !== -1) {
     let feedback = (rightArmAngle + 90) / 180;
     let delay = (rightArmAngle + 90) / 180;
-    feedbackDelay.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
-    feedbackDelay.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
+    feedbackDelay.effect.delayTime.value = parseFloat(clamp(delay, 0.5, 1)); //seconds, any value
+    feedbackDelay.effect.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
     console.log("Feedback: " + feedback);
     console.log("Delay: " + delay);
   }
 
   if (pitchShift.flag && leftFootDiff !== -1) {
     let pitch = Math.abs(leftFootDiff * 60);
-    pitchShift.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
+    pitchShift.effect.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
     console.log("Pitch: " + pitch);
   }
 
@@ -260,9 +261,9 @@ function adjustPlayerEffects(
 
   if (phaser.flag && rightFootDiff !== -1) {
     //TODOL add phaser formula
-    let baseFrequency = rightFootDiff * 10;
-    // autoFilter.depth = parseFloat(clamp(baseFrequency, 0, 1));
-    console.log("Frequency: " + baseFrequency);
+    let octaves = rightFootDiff * 100;
+    phaser.effect.octaves = parseFloat(clamp(octaves, 0, 8));
+    console.log("Octaves: " + octaves);
   }
 
   console.log("------------------");
@@ -289,17 +290,12 @@ let pitchShift = {
 };
 let vibrato = {
   name: "vibrato",
-  effect: new Tone.Vibrato({
-    frequency: 10,
-  }),
+  effect: new Tone.Vibrato(),
   flag: false,
 };
 let phaser = {
   name: "phaser",
-  effect: new Tone.Phaser({
-    frequency: 10,
-    baseFrequency: 1000,
-  }),
+  effect: new Tone.Phaser(),
   flag: false,
 };
 let feedbackDelay = {
