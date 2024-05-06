@@ -23,7 +23,7 @@
       
       3. select a .wav file using "upload sample" in order to use it for audio manipulation 
 
-      4. stand far enough from the webcam so that your whole body is in view
+      4. position yourself within view of the webcam
     
     5. dance 4 me ! ! !</pre>
           <!-- <pre>4. use "switch view" to toggle between stick figure mode and webcam mode </pre> -->
@@ -69,9 +69,12 @@
           <br />
           <br />
           <small>
-            move the slider to adjust the # of persons detected by the webcam —
+            move the slider to adjust the # of people detected by the webcam —
             <br />
             min is 1 and max is 5
+            <br />
+            <br />
+            total # of people must be in frame in order to view webcam feed
           </small>
           <br />
           <br />
@@ -94,8 +97,6 @@
             </script>
           </div>
           <br />
-          <br />
-          <br />
           <a id="closeSettings">– close —</a>
           <br />
         </div>
@@ -109,6 +110,9 @@
       <div id="samplesPopup" class="popup">
         <div class="popup-content">
           <input type="file" id="audioFileInput" />
+          <br />
+          <br />
+          <small>only accepts .wav file type</small>
           <br />
           <br />
           <br />
