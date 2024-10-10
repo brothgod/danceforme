@@ -1,0 +1,4 @@
+- Figure out how to make webcam widescreen
+- Fix bug where 2 people mode can crash (is this still happening?)
+- Add pink screen toggle
+- Add color picker for background and outline

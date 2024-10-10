@@ -56,7 +56,7 @@ if (hasGetUserMedia()) {
 // Enable the live webcam view and start detection.
 function enableCam(event) {
   if (!poseLandmarker) {
-    console.log("Wait! poseLandmaker not loaded yet.");
+    console.debug("Wait! poseLandmaker not loaded yet.");
     return;
   }
 
@@ -72,7 +72,6 @@ function enableCam(event) {
   const constraints = {
     video: true,
   };
-  console.debug("working!!!!");
   // Activate the webcam stream.
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     video.srcObject = stream;
@@ -121,13 +120,14 @@ async function predictWebcam() {
           headDiff = calcLandmarkDiff(result.landmarks, lastLandmarks, 0);
           lastLandmarks = result.landmarks;
           count = 0;
-          // console.log("Feet difference: " + rightFootDiff);
-          // console.log("Head Difference: " + headDiff);
         } else {
           count--;
         }
       }
 
+      console.debug("Right foot difference: " + rightFootDiff);
+      console.debug("Left foot difference: " + leftFootDiff);
+      console.debug("Head difference: " + headDiff);
       console.debug("Right arm angle: " + rightArmAngle);
       console.debug("Left arm angle: " + leftArmAngle);
       if (count % interval == 0) {
@@ -191,14 +191,10 @@ function calcLandmarkDiff(landmarks, pastLandmarks, landmarkNum) {
   });
   landmarkX.sort();
   pastLandmarkX.sort();
-  // console.debug(landmarkX);
-  // console.debug(pastLandmarkX);
   let differences = 0;
   for (let i = 0; i < numPeople.value; i += 1) {
     differences += landmarkX[i] - pastLandmarkX[i];
   }
-  // console.debug(differences);
-  // console.debug(numPeople);
   return differences / numPeople.value;
 }
 
@@ -215,39 +211,38 @@ function adjustPlayerEffects(
 ) {
   if (distortion.flag && leftArmAngle !== -1) {
     let distort = Math.abs(leftArmAngle) / 180;
-    console.log("Distortion: " + distort);
+    console.debug("Distortion: " + distort);
     distortion.effect.distortion = clamp(distort, 0, 0.5);
   }
 
   if (feedbackDelay.flag && rightArmAngle !== -1) {
     let feedback = Math.abs(rightArmAngle) / 180;
     let delay = Math.abs(rightArmAngle) / 90;
-    console.log("Feedback: " + feedback);
-    console.log("Delay: " + delay);
+    console.debug("Feedback: " + feedback);
+    console.debug("Delay: " + delay);
     feedbackDelay.effect.delayTime.value = parseFloat(clamp(delay, 0, 1)); //seconds, any value
     feedbackDelay.effect.feedback.value = parseFloat(clamp(feedback, 0, 0.5)); //between [0,1]
   }
 
   if (pitchShift.flag && leftFootDiff !== -1) {
     let pitch = Math.abs(leftFootDiff * 60);
-    console.log("Pitch: " + pitch);
+    console.debug("Pitch: " + pitch);
     pitchShift.effect.pitch = parseFloat(clamp(pitch, 0, 12)); //half step increments, [0,12]
   }
 
   if (playbackRate.flag && headDiff !== -1) {
     let playbackRate = Math.abs(headDiff * 10) + 0.3;
-    console.log("PlaybackRate: " + playbackRate);
+    console.debug("Playback Rate: " + playbackRate);
     audioElement.playbackRate = parseFloat(clamp(playbackRate, 0.75, 1.25)); // [.2, 1.8]
   }
 
   if (phaser.flag && rightFootDiff !== -1) {
-    //TODOL add phaser formula
     let octaves = Math.abs(rightFootDiff) * 100;
-    console.log("Octaves: " + octaves);
+    console.debug("Octaves: " + octaves);
     phaser.effect.octaves = parseFloat(clamp(octaves, 0, 8));
   }
 
-  console.log("------------------");
+  console.debug("------------------");
 }
 function angleWithXAxis(x, y) {
   // Calculate the angle in radians using Math.atan2
@@ -258,117 +253,3 @@ function angleWithXAxis(x, y) {
 
   return angleDegrees;
 }
-
-// // ----------------------------------- AUDIO PLAYER -----------------------------------------
-const audioElement = document.getElementById("audioElement");
-let player = Tone.getContext().createMediaElementSource(audioElement);
-// audioElement.autoplay = true;
-// audioElement.src = "song-files/Sean Paul, J Balvin - Contra La Pared.wav";
-let pitchShift = {
-  name: "pitch shift",
-  effect: new Tone.PitchShift(),
-  flag: false,
-};
-let phaser = {
-  name: "phaser",
-  effect: new Tone.Phaser({
-    frequency: 10,
-    baseFrequency: 100,
-  }),
-  flag: false,
-};
-let feedbackDelay = {
-  name: "feedback delay",
-  effect: new Tone.FeedbackDelay(),
-  flag: false,
-};
-let distortion = {
-  name: "distortion",
-  effect: new Tone.Distortion(),
-  flag: false,
-};
-
-let playbackRate = { name: "playback rate", effect: null, flag: false };
-let effectMap = [pitchShift, phaser, feedbackDelay, distortion, playbackRate];
-
-function addCheckboxes(effectMap) {
-  const container = document.getElementById("checkboxes");
-  effectMap.forEach((effect) => {
-    let str = effect.name;
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = str;
-    checkbox.name = str.replace(/\s+/g, "-").toLowerCase(); // Convert spaces to hyphens and make lowercase for name attribute
-    checkbox.id = str.replace(/\s+/g, "-").toLowerCase() + "-checkbox"; // Unique ID for the checkbox
-    checkbox.checked = false; //true; // Initially unchecked
-    effect.id = checkbox.id;
-
-    const label = document.createElement("label");
-    label.htmlFor = checkbox.id;
-    label.textContent = str;
-
-    const lineBreak = document.createElement("br");
-
-    container.appendChild(checkbox);
-    container.appendChild(label);
-    container.appendChild(lineBreak);
-  });
-}
-addCheckboxes(effectMap);
-
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  //const fileUrl = 'Sean Paul, J Balvin - Contra La Pared.wav'
-  const fileUrl = URL.createObjectURL(file);
-  Tone.start();
-
-  audioElement.src = fileUrl;
-  setUpEffects(player);
-}
-
-function setUpEffects(tonePlayer) {
-  let lastEffect = tonePlayer;
-  effectMap.forEach(function (effect) {
-    effect.flag = false;
-    let checkbox = document.getElementById(effect.id);
-    if (checkbox.checked) {
-      console.info(checkbox.value + " is checked.");
-      if (effect.name !== "playback rate") {
-        Tone.connect(lastEffect, effect.effect);
-        lastEffect = effect.effect;
-      }
-      effect.flag = true;
-      console.info(effectMap);
-    }
-  });
-  Tone.connect(lastEffect, Tone.getDestination());
-}
-// setUpEffects(player);
-
-function changeEffects() {
-  Tone.disconnect(player);
-  effectMap.forEach(function (effect) {
-    if (effect.name !== "playback rate") Tone.disconnect(effect.effect);
-  });
-
-  setUpEffects(player);
-  audioElement.playbackRate = 1;
-}
-
-document.getElementById("openSettings").addEventListener("click", function () {
-  settingsPopup.classList.add("show");
-});
-document.getElementById("closeSettings").addEventListener("click", function () {
-  settingsPopup.classList.remove("show");
-  changeEffects();
-});
-window.addEventListener("click", function (event) {
-  if (event.target == settingsPopup) {
-    settingsPopup.classList.remove("show");
-    changeEffects();
-  }
-});
-
-// Get references to UI elements
-const audioFileInput = document.getElementById("audioFileInput");
-audioFileInput.addEventListener("change", handleFileUpload);

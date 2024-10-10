@@ -75,17 +75,6 @@ li a:hover {
   justify-content: center;
 }
 
-/* #bottom-right2 {
-  position: fixed;
-  bottom: 25px;
-  right: 0px;
-  z-index: 2;
-} */
-
-audio {
-  width: 40vw;
-}
-
 #bottom-right3 {
   position: fixed;
   bottom: 25px;
@@ -98,6 +87,10 @@ audio {
   bottom: 0px;
   left: 0px;
   z-index: 2;
+}
+
+audio {
+  width: 40vw;
 }
 
 label {
@@ -181,10 +174,6 @@ input {
   cursor: pointer;
 }
 
-/* #settingsPopup .popup-content {
-  height: 360px;
-} */
-
 #samplesPopup .popup-content {
   height: 85px;
 }
@@ -198,9 +187,6 @@ input {
 video {
   clear: both;
   display: block;
-  /* transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-  -moz-transform: rotateY(180deg); */
 }
 
 .invisible {
@@ -211,7 +197,6 @@ video {
   position: relative;
   float: left;
   width: 100%;
-  /* cursor: pointer; */
 }
 
 .canvas {
